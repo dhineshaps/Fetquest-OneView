@@ -5,6 +5,7 @@ import yfinance as yf
 
 
 #handling rupes symbol
+#using AI
 
 if "rows" not in st.session_state:
     st.session_state["rows"] = []
