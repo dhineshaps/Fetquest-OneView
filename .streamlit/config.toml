@@ -1,0 +1,8 @@
+[server]
+enableStaticServing = true
+
+[ui]
+showPagesFromConfig = true
+
+[client]
+showSidebarNavigation = false

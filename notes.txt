@@ -1,0 +1,21 @@
+installed supabasedb lib
+
+
+-- CREATE TABLE public.fet_portfolio (
+-- username VARCHAR (50) NOT NULL,
+-- asset VARCHAR (50) NOT NULL,
+-- quantity INT NOT NULL,
+-- average_price INT NOT NULL
+--  );
+
+-- DROP TABLE public.fet_portfolio;
+
+-- CREATE TABLE public.fet_portfolio_users (
+--     user_id SERIAL PRIMARY KEY,
+--     username VARCHAR(50) UNIQUE NOT NULL,
+--     password_hash VARCHAR(255) NOT NULL,
+--     email VARCHAR(255) UNIQUE NOT NULL,
+--     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- select * from public.fet_portfolio_users;

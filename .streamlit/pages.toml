@@ -1,0 +1,4 @@
+[[pages]]
+path = "login.py"
+name = "Login"
+icon = "🔑"
