@@ -3,7 +3,6 @@ import requests
 
 st.title("TalentScout")
 
-api_key = "AIzaSyByJUQSEB2ofihGylvJujbUg-pGS9ToGeE"
 cx = "32207faa631794d44"
 queryx = st.text_input("Search Query",placeholder="Python Developer Bengaluru").strip()
 query = f'site:linkedin.com/in "{queryx}"'
