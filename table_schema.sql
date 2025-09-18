@@ -16,11 +16,37 @@ average_price INT NOT NULL
 
 
 
+-- create table public.fet_portfolio_holdings (
+--   id bigint not null,
+--   type character varying(50) not null,
+--   quantity integer not null,
+--   average_price double precision not null,
+--   asset character varying PRIMARY KEY not null,
+--   symbol character varying(50) not null
+-- ) TABLESPACE pg_default;
+
+
+
 create table public.fet_portfolio_holdings (
-  id bigint not null,
-  type character varying(50) not null,
-  quantity integer not null,
-  average_price double precision not null,
-  asset character varying PRIMARY KEY not null,
-  symbol character varying(50) not null
-) TABLESPACE pg_default;
+    id bigserial primary key,
+    user_id int not null,
+    type varchar(50) not null,          -- Stock, Mutual Fund, Gold
+    asset varchar not null,             -- Reliance, HDFC MF, etc.
+    symbol varchar(50),                 -- RELIANCE.NS (nullable for MF/Gold)
+    quantity numeric not null,          -- units / shares / grams
+    average_price numeric not null,     -- avg NAV or avg buy price
+    last_updated_date date not null default current_date
+);
+
+
+create table public.fet_portfolio_holdings_mf_transactions (
+    id bigserial primary key,
+    user_id int not null,
+    fund_name text not null,
+    txn_date date not null,
+    txn_type text check (txn_type in ('Buy','Sell')) not null,
+    amount numeric not null,
+    nav numeric not null,
+    units numeric not null,
+    created_at timestamp default now()
+);
