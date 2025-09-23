@@ -1,8 +1,9 @@
 import pandas as pd
 import streamlit as st
-from query import update_portfolio,delete_portfolio,load_portfolio,insert_portfolio1
+from query import update_portfolio,delete_portfolio,load_portfolio,insert_portfolio1, get_mf_data,insert_mf_holdings,insert_mf_transactions
 import uuid
 from postgrest.exceptions import APIError
+from collections import defaultdict
 
 st.title("FETQuest OneView – Manage Portfolio")
 
@@ -175,8 +176,9 @@ with tab1:
         elif asset_type == "Mutual Fund":
 
             rows_data.append({
+                    "user_id":20,
                     "type": "Mutual Fund",
-                    "asset": fund_name,
+                    "fund_name": fund_name,
                     "txn_date": str(txn_date),
                     "txn_type": txn_type,
                     "amount": amount,
@@ -207,6 +209,80 @@ with tab1:
     with col_i1:
         if st.button("Submit", type="primary"):
             st.write(rows_data)
+            print(rows_data)
+            ####### New updated for MF by 29-Sep#############
+            stocks_gold = []
+            mf_txns = []
+            mf_bulk_insert = []
+            for row in rows_data:
+                 if row["type"] in ("Stock", "Gold"):
+                     stocks_gold.append((
+                        row["id"],
+                        row["type"],
+                        row["asset"],
+                        row.get("symbol", row["asset"]),
+                        row["quantity"],
+                        row["average_price"],
+                         ))
+                 elif row["type"] == "Mutual Fund":
+                    mf_txns.append((
+                      row["user_id"], row["type"], row["fund_name"], row["txn_date"], row["txn_type"],
+                        row["amount"], row["nav"], row["units"]
+                    ))
+                    print("#########################################")
+                    #print(row)
+                    mf_bulk_insert.append(row)
+                    print("#########################################")
+            st.write("stocks and gold")
+            #st.write(stocks_gold)
+            st.write("mf")
+            st.write(mf_txns)
+            for i in mf_txns:
+                user_id, type, fund, txn_date, txn_type, amout,nav, units = i
+                print(fund)
+                #print(type, fund, txn_date, txn_type, amout,nav, units)
+                try:
+                    print("hereeee")
+                    dat = get_mf_data(user_id,fund)
+                    print(dat)
+                except APIError as e:
+                    error_data = e.args[0]
+
+                if not dat.data:
+                    print("Empty")
+                    try:
+                        response =  insert_mf_holdings(user_id,type,units,amout,fund)
+                        print(response)
+                        st.write("Success")
+                    except APIError as e:
+                        error_data = e.args[0]
+
+                else:
+                    print("HERE")
+                    old_qty = dat.data[0].get("quantity")
+                    new_qty = units + old_qty
+                    print(new_qty)
+                    old_price = dat.data[0].get("average_price")
+                    new_price = float(old_price+amount)
+                    print(new_price)
+                    try:
+                       update_mf_holdings = update_portfolio(new_qty,new_price,fund,user_id)
+                    except APIError as e:
+                         error_data = e.args[0]  # APIError contains the dict you pasted
+                    
+                    if not update_mf_holdings:
+                        st.write("Failed to insert, Please try again")
+                    else:
+                        st.write("Success")
+
+            
+            st.write("MF Transaction")
+            st.write(mf_bulk_insert)
+            res = insert_mf_transactions(mf_bulk_insert)
+            print(res)
+
+                                
+            
             # invalid_rows = []
             # for row in st.session_state["rows"]:
             #     asset_type = st.session_state.get(f"type_{row}")

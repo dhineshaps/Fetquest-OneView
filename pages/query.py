@@ -18,7 +18,7 @@ supabase: Client = create_client(url, key)
 def load_portfolio():
  
     try:
-        response_all_stock_data = supabase.table("fet_portfolio_holdings").select("type","quantity","average_price","asset","symbol").eq("id", 56).execute()
+        response_all_stock_data = supabase.table("fet_portfolio_holdings_old").select("type","quantity","average_price","asset","symbol").eq("id", 56).execute()
     except APIError as e:
         print(e)
         response = st.error("Error in Retrieving the data, Retry after sometime")
@@ -34,14 +34,37 @@ def insert_portfolio1(ins_data):
         .execute()
     )
 
-def update_portfolio(qty,avg_price,asset):
+def get_mf_data(user_id,asset):
+    return (
+        supabase.table("fet_portfolio_holdings")
+        .select("quantity","average_price")
+        .eq("user_id",user_id)
+        .eq("asset",asset)
+        .execute()
+    )
+
+def insert_mf_holdings(user_id,type,qty,avg_price,asset):
+    return (
+        supabase.table("fet_portfolio_holdings")
+        .insert({"user_id": user_id, "type": type,"asset": asset,"quantity": qty,"average_price":avg_price})
+        .execute()
+    )
+
+def insert_mf_transactions(mfs_data):
+    return (
+        supabase.table("fet_portfolio_holdings_mf_transactions")
+        .insert(mfs_data)
+        .execute()
+    )
+
+def update_portfolio(qty,avg_price,asset,user_id):
 
     try:
 
         response = (
             supabase.table("fet_portfolio_holdings")
             .update({"quantity": qty,"average_price":avg_price})
-            .eq("id", 56)
+            .eq("user_id",user_id)
             .eq("asset", asset)
             .execute()
         )

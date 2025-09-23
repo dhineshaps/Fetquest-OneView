@@ -4,7 +4,7 @@ from supabase import create_client, Client
 import bcrypt
 from postgrest.exceptions import APIError
 import time
-from utils import save_user_id
+#rom utils import save_user_id
 import pandas as pd
 
 url="https://anpufhhyswexjgwwddcy.supabase.co"
@@ -31,6 +31,15 @@ def insert_portfolio1(ins_data):
     return (
         supabase.table("fet_portfolio_holdings")
         .insert(ins_data)
+        .execute()
+    )
+
+def get_mf_data(user_id,asset):
+    return (
+        supabase.table("fet_portfolio_holdings")
+        .select("quantity","average_price")
+        .eq("user_id",user_id)
+        .eq("asset",asset)
         .execute()
     )
 
@@ -75,4 +84,3 @@ def delete_portfolio(asset):
         response = st.error("Error in delete the data, Retry after sometime")
 
     return response
-
