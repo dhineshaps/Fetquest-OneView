@@ -166,7 +166,7 @@ with tab1:
 
         if asset_type == "Stock":
             rows_data.append({
-                "id":56,
+                "user_id":56,
                 "type": st.session_state.get(f"type_{row}"),
                 "asset": st.session_state.get(f"stock_{row}"),
                 "symbol": cos_symbol,
@@ -195,7 +195,7 @@ with tab1:
             # })
         else:
             rows_data.append({
-                "id":56,
+                "user_id":56,
                 "type": st.session_state.get(f"type_{row}"),
                 "asset": st.session_state.get(f"gold_{row}"),
                 "symbol": "NA",
@@ -214,87 +214,183 @@ with tab1:
             stocks_gold = []
             mf_txns = []
             mf_bulk_insert = []
+
             for row in rows_data:
                  if row["type"] in ("Stock", "Gold"):
-                     stocks_gold.append((
-                        row["id"],
-                        row["type"],
-                        row["asset"],
-                        row.get("symbol", row["asset"]),
-                        row["quantity"],
-                        row["average_price"],
-                         ))
+                     stocks_gold.append(row)
+
                  elif row["type"] == "Mutual Fund":
                     mf_txns.append((
                       row["user_id"], row["type"], row["fund_name"], row["txn_date"], row["txn_type"],
                         row["amount"], row["nav"], row["units"]
                     ))
-                    print("#########################################")
-                    #print(row)
-                    mf_bulk_insert.append(row)
-                    print("#########################################")
-            st.write("stocks and gold")
-            #st.write(stocks_gold)
-            st.write("mf")
-            st.write(mf_txns)
-            for i in mf_txns:
-                user_id, type, fund, txn_date, txn_type, amout,nav, units = i
-                print(fund)
-                #print(type, fund, txn_date, txn_type, amout,nav, units)
-                try:
-                    print("hereeee")
-                    dat = get_mf_data(user_id,fund)
-                    print(dat)
-                except APIError as e:
-                    error_data = e.args[0]
 
-                if not dat.data:
-                    print("Empty")
+                    mf_bulk_insert.append(row)
+
+            print("*************Here****************")        
+            print(stocks_gold)
+            print("*************Here****************")
+            if  mf_txns:
+                for i in mf_txns:
+                    user_id, type, fund, txn_date, txn_type, amout,nav, units = i
+                    print(fund)
                     try:
-                        response =  insert_mf_holdings(user_id,type,units,amout,fund)
-                        print(response)
-                        st.write("Success")
+                        dat = get_mf_data(user_id,fund)
+                        print(dat)
                     except APIError as e:
                         error_data = e.args[0]
 
-                else:
-                    print("HERE")
-                    old_qty = dat.data[0].get("quantity")
-                    new_qty = units + old_qty
-                    print(new_qty)
-                    old_price = dat.data[0].get("average_price")
-                    new_price = float(old_price+amount)
-                    print(new_price)
-                    try:
-                       update_mf_holdings = update_portfolio(new_qty,new_price,fund,user_id)
-                    except APIError as e:
-                         error_data = e.args[0]  # APIError contains the dict you pasted
-                    
-                    if not update_mf_holdings:
-                        st.write("Failed to insert, Please try again")
+                    if not dat.data:
+                        try:
+                            response =  insert_mf_holdings(user_id,type,units,amout,fund)
+                            print(response)
+                            st.write("Success")
+                        except APIError as e:
+                            error_data = e.args[0]
+                            st.write("Failed to insert, Please try again")
+                            st.stop()
+
                     else:
-                        st.write("Success")
+                        print("HERE")
+                        old_qty = dat.data[0].get("quantity")
+                        new_qty = units + old_qty
+                        print(new_qty)
+                        old_price = dat.data[0].get("average_price")
+                        new_price = float(old_price+amount)
+                        print(new_price)
+                        try:
+                           update_mf_holdings = update_portfolio(new_qty,new_price,fund,user_id)
+                        except APIError as e:
+                             error_data = e.args[0]  # APIError contains the dict you pasted
+                        
+                        if not update_mf_holdings:
+                            st.write("Failed to insert, Please try again")
+                            st.stop()
+                        else:
+                 
+                            st.write("Success")
+                try:
+                    res = insert_mf_transactions(mf_bulk_insert)
+                    st.session_state["insert_success_mutual_fund"] = True
+                except APIError as e:
+                    error_data = e.args[0]
+                    st.write("Failed to insert, Please try again")
+                    st.stop()
+
+
+            if stocks_gold:
+                try:
+                        res = insert_portfolio1(stocks_gold)
+                        st.write(res)
+                        st.session_state["insert_success_Stocks"] = True
+                        st.session_state["rows"] = []
+                        st.rerun()
+                except APIError as e:
+                    error_data = e.args[0]  # APIError contains the dict you pasted
+                    st.write(f"This asset {error_data.split(",")[3].split("=")[1].split("(")[1].split(")")[0]} already exists in your portfolio. Try updating instead")
+                    st.stop()
+            else:
+                st.session_state["rows"] = []   ## added here so if no stock/gold transaction it will remove the rowsa
+
+
+
+            if st.session_state.get("insert_success_Stocks") and st.session_state.get("insert_success_mutual_fund") :
+                st.toast("✅ Holdings added!", icon="🎉")
+                st.session_state["insert_success"] = False   
+
+            # res = insert_portfolio1(stocks_gold)
+            # print(res)
+            # st.write("MF Transaction")
+            # st.write(mf_bulk_insert)
+            # res = insert_mf_transactions(mf_bulk_insert)
+            # print(res)
+
+        #####################################################################################################################
+
+            # for row in rows_data:
+            #      if row["type"] in ("Stock", "Gold"):
+            #          stocks_gold.append((
+            #             row["id"],
+            #             row["type"],
+            #             row["asset"],
+            #             row.get("symbol", row["asset"]),
+            #             row["quantity"],
+            #             row["average_price"],
+            #              ))
+            #      elif row["type"] == "Mutual Fund":
+            #         mf_txns.append((
+            #           row["user_id"], row["type"], row["fund_name"], row["txn_date"], row["txn_type"],
+            #             row["amount"], row["nav"], row["units"]
+            #         ))
+            #         print("#########################################")
+            #         #print(row)
+            #         mf_bulk_insert.append(row)
+            #         print("#########################################")
+            # st.write("stocks and gold")
+            # #st.write(stocks_gold)
+            # st.write("mf")
+            # st.write(mf_txns)
+            # for i in mf_txns:
+            #     user_id, type, fund, txn_date, txn_type, amout,nav, units = i
+            #     print(fund)
+            #     #print(type, fund, txn_date, txn_type, amout,nav, units)
+            #     try:
+            #         print("hereeee")
+            #         dat = get_mf_data(user_id,fund)
+            #         print(dat)
+            #     except APIError as e:
+            #         error_data = e.args[0]
+
+            #     if not dat.data:
+            #         print("Empty")
+            #         try:
+            #             response =  insert_mf_holdings(user_id,type,units,amout,fund)
+            #             print(response)
+            #             st.write("Success")
+            #         except APIError as e:
+            #             error_data = e.args[0]
+
+            #     else:
+            #         print("HERE")
+            #         old_qty = dat.data[0].get("quantity")
+            #         new_qty = units + old_qty
+            #         print(new_qty)
+            #         old_price = dat.data[0].get("average_price")
+            #         new_price = float(old_price+amount)
+            #         print(new_price)
+            #         try:
+            #            update_mf_holdings = update_portfolio(new_qty,new_price,fund,user_id)
+            #         except APIError as e:
+            #              error_data = e.args[0]  # APIError contains the dict you pasted
+                    
+            #         if not update_mf_holdings:
+            #             st.write("Failed to insert, Please try again")
+            #         else:
+            #             st.write("Success")
 
             
-            st.write("MF Transaction")
-            st.write(mf_bulk_insert)
-            res = insert_mf_transactions(mf_bulk_insert)
-            print(res)
+            # st.write("MF Transaction")
+            # st.write(mf_bulk_insert)
+            # res = insert_mf_transactions(mf_bulk_insert)
+            # print(res)
 
-                                
+  ################################## above till new ###########################################################                               
             
-            # invalid_rows = []
-            # for row in st.session_state["rows"]:
-            #     asset_type = st.session_state.get(f"type_{row}")
-            #     price = st.session_state.get(f"price_{row}", 0)
+            invalid_rows = []
+            for row in st.session_state["rows"]:
+                asset_type = st.session_state.get(f"type_{row}")
+                price = st.session_state.get(f"price_{row}", 0)
+                st.write(price)
 
-            #     if asset_type in ("Stock", "Mutual Fund") and (price is None or price <= 0):
-            #         invalid_rows.append(row)
+                if asset_type in ("Stock", "Mutual Fund") and (price is None or price <= 0):
+                    invalid_rows.append(row)
 
-            # if invalid_rows:
-            #     st.error("❌ Average Price (must be > 0). Please correct before submitting.")
-            #     st.stop()
-            # ins_data = list(rows_data)
+            if invalid_rows:
+                st.error("❌ Average Price (must be > 0). Please correct before submitting.")
+                st.stop()
+            ins_data = list(rows_data)
+            print("before insert")
+            print(ins_data )
             # try:
             #         res = insert_portfolio1(ins_data)
             #         st.write(res)
@@ -327,6 +423,7 @@ def reset_update_state():
         if key in st.session_state:
             del st.session_state[key]
 with tab2:
+        st.info("Mutual Fund Buy/Sell are handled in Transactions")
     #def update_holiding():
         if "update_expanded" not in st.session_state:
             st.session_state.update_expanded = False
@@ -337,7 +434,7 @@ with tab2:
     #with st.expander("✏️ Update Holding", expanded=st.session_state.update_expanded):
         option_asset = st.selectbox(
             "Asset Type",
-            ("Stock", "Mutual Fund", "Gold"),
+            ("Stock", "Gold"),   #("Stock", "Mutual Fund", "Gold"),
             index=None,
             placeholder="Select Asset Type",
             key="update_asset_type"
