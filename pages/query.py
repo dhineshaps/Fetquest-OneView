@@ -18,7 +18,7 @@ supabase: Client = create_client(url, key)
 def load_portfolio():
  
     try:
-        response_all_stock_data = supabase.table("fet_portfolio_holdings_old").select("type","quantity","average_price","asset","symbol").eq("id", 56).execute()
+        response_all_stock_data = supabase.table("fet_portfolio_holdings").select("type","quantity","average_price","asset","symbol").eq("user_id", 56).execute()
     except APIError as e:
         print(e)
         response = st.error("Error in Retrieving the data, Retry after sometime")
@@ -26,6 +26,17 @@ def load_portfolio():
 
     return pd.DataFrame(data_all_stock_data)
 
+
+def load_mf_transactions():
+ 
+    try:
+        response_all_mf_data = supabase.table("fet_portfolio_holdings_mf_transactions").select("id","fund_name","txn_type","amount","nav","units","created_at").eq("user_id", 56).execute()
+    except APIError as e:
+        print(e)
+        response = st.error("Error in Retrieving the data, Retry after sometime")
+    mf_data= response_all_mf_data .data
+
+    return pd.DataFrame(mf_data)
 
 def insert_portfolio1(ins_data):
     return (
@@ -86,8 +97,49 @@ def delete_portfolio(asset):
         response = (
             supabase.table("fet_portfolio_holdings")
             .delete()
-            .eq("id", 56)
+            .eq("user_id", 56)
             .eq("asset", asset)
+            .execute()
+        )
+
+        print(response)
+
+    except APIError as e:
+        print(e)
+        response = st.error("Error in delete the data, Retry after sometime")
+
+    return response
+
+
+def delete_mf_transaction(asset):
+
+    try:
+
+        response = (
+            supabase.table("fet_portfolio_holdings_mf_transactions")
+            .delete()
+            .eq("user_id", 56)
+            .eq("fund_name", asset)
+            .execute()
+        )
+
+        print(response)
+
+    except APIError as e:
+        print(e)
+        response = st.error("Error in delete the data, Retry after sometime")
+
+    return response
+
+def delete_mf_transaction_id(asset,id):
+    try:
+
+        response = (
+            supabase.table("fet_portfolio_holdings_mf_transactions")
+            .delete()
+            .eq("user_id", 56)
+            .eq("id", id)
+            .eq("fund_name", asset)
             .execute()
         )
 

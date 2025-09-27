@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
-from query import update_portfolio,delete_portfolio,load_portfolio,insert_portfolio1, get_mf_data,insert_mf_holdings,insert_mf_transactions
+from query import update_portfolio,delete_portfolio,load_portfolio,insert_portfolio1, get_mf_data,insert_mf_holdings
+from query import insert_mf_transactions,delete_mf_transaction,delete_mf_transaction_id,load_mf_transactions
 import uuid
 from postgrest.exceptions import APIError
 from collections import defaultdict
@@ -35,24 +36,48 @@ st.markdown(
 
 # ---------------- READ HOLDING ----------------
 
-def show_holdings():
+def show_holdings():  # user id needs to be passed
     df = load_portfolio().reset_index(drop=True)
     df.index = df.index + 1 
     df.index.name = "S.No"
-    #st.dataframe(df, use_container_width=True)
-
     return df
 
 #portfolio_curd will be used in Update and Delete for filtering
-portfolio_curd = show_holdings()
+portfolio_curd = show_holdings()  # user id needs to be passed
+
+# print(portfolio_curd)
 
 # Creating new Dataframe for user visualization with cosmetic changes.
+
 portfolio_dashboard = portfolio_curd
-portfolio_dashboard = portfolio_dashboard.drop("symbol", axis=1)
-portfolio_dashboard.columns = portfolio_dashboard.columns.str.capitalize()
-portfolio_dashboard ["Asset"] = portfolio_dashboard ["Asset"].str.upper()
-st.dataframe(portfolio_dashboard , use_container_width=True)
+
+if not portfolio_dashboard.empty:
+    portfolio_dashboard = portfolio_dashboard.drop("symbol", axis=1)
+    portfolio_dashboard.columns = portfolio_dashboard.columns.str.capitalize()
+    portfolio_dashboard ["Asset"] = portfolio_dashboard ["Asset"].str.upper()
+    st.dataframe(portfolio_dashboard , use_container_width=True)
+else:
+    st.write("Portfolio is Empty")
+
 #----------------------------------------------------------------------------#
+
+def show_mf_transactions():  # user id needs to be passed
+    df = load_mf_transactions().reset_index(drop=True)
+    df.index = df.index + 1 
+    df.index.name = "S.No"
+    return df
+
+mf_transactions = show_mf_transactions()  # user id needs to be passed
+
+if not mf_transactions.empty:
+    mf_transactions.columns = ['Transaction Id', 'Mutual Fund Scheme','Transaction Type','Invested','NAV','UNITS','Transaction Date']
+    mf_transactions["Transaction Date"] = pd.to_datetime(mf_transactions["Transaction Date"])
+    mf_transactions["Date"] = mf_transactions["Transaction Date"].dt.date
+    mf_transactions["Time"] = mf_transactions["Transaction Date"].dt.time
+    mf_transactions =  mf_transactions.drop("Transaction Date",axis=1)
+    st.dataframe(mf_transactions , use_container_width=True)
+else:
+    st.write("No Mutual Fund Transactions Recorded")
 
 
 # ---------------- ADD HOLDING ----------------
@@ -82,8 +107,8 @@ with tab1:
 
     rows_data = []
     for row in st.session_state["rows"]:
-        #col1, col2, col3, col4, col5 = st.columns([2,2,2,2,1])
         col1, col2, col3, col4, col5 = st.columns([1.2, 3.5, 1, 1, 0.6])
+
 
         with col1:
             asset_type = st.selectbox(
@@ -101,28 +126,18 @@ with tab1:
                     key=f"stock_{row}",
                 )
             elif asset_type == "Mutual Fund":
-                fund_name = st.selectbox("MF", fund_list, index=None, key=f"mf_{row}")
-                txn_date = st.date_input("Txn Date", pd.to_datetime("today"), key=f"date_{row}")
-                txn_type = st.selectbox("Txn Type", ["Buy", "Sell"], key=f"txn_type_{row}")
+                fund_name = st.selectbox("Mutual Fund Scheme", fund_list, index=None, key=f"mf_{row}")
+                txn_date = st.date_input("Transaction Date", pd.to_datetime("today"), key=f"date_{row}")
+                txn_type = st.selectbox("Transaction Type", ["Buy", "Sell"], key=f"txn_type_{row}")
 
                 col_mf1, col_mf2, col_mf3 = st.columns(3)
                 with col_mf1:
                     amount = st.number_input("Amount (₹)", min_value=0.0, key=f"amt_{row}")
                 with col_mf2:
                     nav = st.number_input("NAV", min_value=0.0, key=f"nav_{row}")
-                with col_mf3:
-                    units = amount / nav if nav > 0 else 0.0
-                    st.metric("Units", f"{units:.2f}")
-
-                # rows_data.append({
-                #     "type": "Mutual Fund",
-                #     "asset": fund_name,
-                #     "txn_date": str(txn_date),
-                #     "txn_type": txn_type,
-                #     "amount": amount,
-                #     "nav": nav,
-                #     "units": units
-                # })
+                # with col_mf3:
+                #     units = amount / nav if nav > 0 else 0.0
+                #     st.metric("Units", f"{units:.2f}") 
             else:
                 st.selectbox("Gold Type",Gold_list,index=None, key=f"gold_{row}")
 
@@ -130,15 +145,19 @@ with tab1:
          if asset_type == "Stock":
             st.number_input("Quantity", min_value=1, key=f"qty_{row}")
          elif asset_type == "Mutual Fund":
-             st.number_input("Units", min_value=1, key=f"qty_{row}")
+             #st.number_input("Units", min_value=1, key=f"qty_{row}")
+             units = round(amount / nav, 2) if nav > 0 else 0.0
+             st.metric("Units", f"{units:.2f}")
          else:
              st.number_input("Gram", min_value=1, key=f"qty_{row}")
 
         with col4:
-            if asset_type in ("Stock", "Mutual Fund"):
+            if asset_type == "Stock":
                 st.number_input("Average Price", min_value=0.0, key=f"price_{row}")
+            elif asset_type == "Gold":
+                st.number_input("**_Optional Price_** ", min_value=0.0, key=f"price_{row}")
             else:
-                st.write("NA")
+                pass
 
         with col5:
             st.button("🗑️", key=f"del_{row}", on_click=remove_row, args=[row])
@@ -176,7 +195,7 @@ with tab1:
         elif asset_type == "Mutual Fund":
 
             rows_data.append({
-                    "user_id":20,
+                    "user_id":56,
                     "type": "Mutual Fund",
                     "fund_name": fund_name,
                     "txn_date": str(txn_date),
@@ -185,14 +204,6 @@ with tab1:
                     "nav": nav,
                     "units": units
                 })
-            # rows_data.append({
-            #     "id":56,
-            #     "type": st.session_state.get(f"type_{row}"),
-            #     "asset": st.session_state.get(f"mf_{row}"),
-            #     "symbol": str(fund_isin),
-            #     "quantity": st.session_state.get(f"qty_{row}"),
-            #     "average_price": st.session_state.get(f"price_{row}")
-            # })
         else:
             rows_data.append({
                 "user_id":56,
@@ -200,7 +211,7 @@ with tab1:
                 "asset": st.session_state.get(f"gold_{row}"),
                 "symbol": "NA",
                 "quantity": st.session_state.get(f"qty_{row}"),
-                "average_price": 0
+                "average_price": st.session_state.get(f"price_{row}")
             })
 
    
@@ -210,7 +221,24 @@ with tab1:
         if st.button("Submit", type="primary"):
             st.write(rows_data)
             print(rows_data)
-            ####### New updated for MF by 29-Sep#############
+
+            invalid_rows = []
+            for row in st.session_state["rows"]:
+                asset_type = st.session_state.get(f"type_{row}")
+                print(asset_type)
+                price = st.session_state.get(f"price_{row}", 0)
+                amount = st.session_state.get(f"amt_{row}", 0)
+                nav = st.session_state.get(f"nav_{row}", 0)
+                print("nav",nav)
+                if asset_type in ("Stock") and (price is None or price <= 0):
+                    invalid_rows.append(row)
+                if asset_type in ("Mutual Fund") and (( amount is None or amount <= 0) or (nav is None or nav <= 0)):
+                    invalid_rows.append(row)
+            
+            if invalid_rows:
+                st.error("❌ Please Make Sure Average Price/Amount/Nav is Non Zero Values for Stocks and Mutual Funds")
+                st.stop()
+            # ####### New updated for MF by 29-Sep#############
             stocks_gold = []
             mf_txns = []
             mf_bulk_insert = []
@@ -242,12 +270,13 @@ with tab1:
 
                     if not dat.data:
                         try:
-                            response =  insert_mf_holdings(user_id,type,units,amout,fund)
+                            ##insert
+                            response =  insert_mf_holdings(user_id,type,units,amout,fund) ##insert
                             print(response)
                             st.write("Success")
                         except APIError as e:
                             error_data = e.args[0]
-                            st.write("Failed to insert, Please try again")
+                            st.write("Failed to Add Transaction, Please try again")
                             st.stop()
 
                     else:
@@ -264,7 +293,7 @@ with tab1:
                              error_data = e.args[0]  # APIError contains the dict you pasted
                         
                         if not update_mf_holdings:
-                            st.write("Failed to insert, Please try again")
+                            st.write("Failed to Add Transaction, Please try again")
                             st.stop()
                         else:
                  
@@ -274,7 +303,7 @@ with tab1:
                     st.session_state["insert_success_mutual_fund"] = True
                 except APIError as e:
                     error_data = e.args[0]
-                    st.write("Failed to insert, Please try again")
+                    st.write("Failed to Add Transaction, Please try again")
                     st.stop()
 
 
@@ -294,117 +323,10 @@ with tab1:
 
 
 
-            if st.session_state.get("insert_success_Stocks") and st.session_state.get("insert_success_mutual_fund") :
-                st.toast("✅ Holdings added!", icon="🎉")
-                st.session_state["insert_success"] = False   
-
-            # res = insert_portfolio1(stocks_gold)
-            # print(res)
-            # st.write("MF Transaction")
-            # st.write(mf_bulk_insert)
-            # res = insert_mf_transactions(mf_bulk_insert)
-            # print(res)
-
-        #####################################################################################################################
-
-            # for row in rows_data:
-            #      if row["type"] in ("Stock", "Gold"):
-            #          stocks_gold.append((
-            #             row["id"],
-            #             row["type"],
-            #             row["asset"],
-            #             row.get("symbol", row["asset"]),
-            #             row["quantity"],
-            #             row["average_price"],
-            #              ))
-            #      elif row["type"] == "Mutual Fund":
-            #         mf_txns.append((
-            #           row["user_id"], row["type"], row["fund_name"], row["txn_date"], row["txn_type"],
-            #             row["amount"], row["nav"], row["units"]
-            #         ))
-            #         print("#########################################")
-            #         #print(row)
-            #         mf_bulk_insert.append(row)
-            #         print("#########################################")
-            # st.write("stocks and gold")
-            # #st.write(stocks_gold)
-            # st.write("mf")
-            # st.write(mf_txns)
-            # for i in mf_txns:
-            #     user_id, type, fund, txn_date, txn_type, amout,nav, units = i
-            #     print(fund)
-            #     #print(type, fund, txn_date, txn_type, amout,nav, units)
-            #     try:
-            #         print("hereeee")
-            #         dat = get_mf_data(user_id,fund)
-            #         print(dat)
-            #     except APIError as e:
-            #         error_data = e.args[0]
-
-            #     if not dat.data:
-            #         print("Empty")
-            #         try:
-            #             response =  insert_mf_holdings(user_id,type,units,amout,fund)
-            #             print(response)
-            #             st.write("Success")
-            #         except APIError as e:
-            #             error_data = e.args[0]
-
-            #     else:
-            #         print("HERE")
-            #         old_qty = dat.data[0].get("quantity")
-            #         new_qty = units + old_qty
-            #         print(new_qty)
-            #         old_price = dat.data[0].get("average_price")
-            #         new_price = float(old_price+amount)
-            #         print(new_price)
-            #         try:
-            #            update_mf_holdings = update_portfolio(new_qty,new_price,fund,user_id)
-            #         except APIError as e:
-            #              error_data = e.args[0]  # APIError contains the dict you pasted
-                    
-            #         if not update_mf_holdings:
-            #             st.write("Failed to insert, Please try again")
-            #         else:
-            #             st.write("Success")
-
-            
-            # st.write("MF Transaction")
-            # st.write(mf_bulk_insert)
-            # res = insert_mf_transactions(mf_bulk_insert)
-            # print(res)
-
-  ################################## above till new ###########################################################                               
-            
-            invalid_rows = []
-            for row in st.session_state["rows"]:
-                asset_type = st.session_state.get(f"type_{row}")
-                price = st.session_state.get(f"price_{row}", 0)
-                st.write(price)
-
-                if asset_type in ("Stock", "Mutual Fund") and (price is None or price <= 0):
-                    invalid_rows.append(row)
-
-            if invalid_rows:
-                st.error("❌ Average Price (must be > 0). Please correct before submitting.")
-                st.stop()
-            ins_data = list(rows_data)
-            print("before insert")
-            print(ins_data )
-            # try:
-            #         res = insert_portfolio1(ins_data)
-            #         st.write(res)
-            #         st.session_state["insert_success"] = True
-            #         st.session_state["rows"] = []
-            #         st.rerun()
-            # except APIError as e:
-            #     error_data = e.args[0]  # APIError contains the dict you pasted
-            #     st.write(f"This asset {error_data.split(",")[3].split("=")[1].split("(")[1].split(")")[0]} already exists in your portfolio. Try updating instead")
-            #     st.stop()
-
-        # if st.session_state.get("insert_success"):
-        #     st.toast("✅ Holdings added!", icon="🎉")
-        #     st.session_state["insert_success"] = False
+        if st.session_state.get("insert_success_Stocks") or st.session_state.get("insert_success_mutual_fund") :
+            st.toast("✅ Holdings added!", icon="🎉")
+            st.session_state["insert_success_Stocks"] = False
+            st.session_state["insert_success_mutual_fund"] = False    
 
     with col_i2:
         if st.button("Cancel", type="primary"):
@@ -472,8 +394,9 @@ with tab2:
                     if st.button("✅ Update Holding", key="update_button"):
                         if (qty_new != qty) or (avg_price_new != avg_price):
                             st.info("Proceeding update")
-                            res = update_portfolio(qty_new, avg_price_new, asset)
+                            res = update_portfolio(qty_new, avg_price_new, asset,56)
                             st.success("Portfolio updated")
+                            st.toast("✅ Holdings Updated!", icon="🎉")
                             reset_update_state()
                             st.rerun()
                         else:
@@ -510,8 +433,9 @@ with tab3:
             st.session_state.update_expanded = False
 
         asset = None
-        if option_asset1 in ["Stock", "Mutual Fund", "Gold"]:
+        if option_asset1 in ["Stock","Gold"]:
             asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset1), "asset"].tolist()
+            print(asset_list)
             if asset_list:
                 asset = st.selectbox(
                     f"Select {option_asset1}",
@@ -522,17 +446,109 @@ with tab3:
                 )
             else:
                 st.info("There is no holding under this Asset")
+        elif option_asset1 == "Mutual Fund":
+
+            delete_mf  = st.selectbox("Mutual Fund Delete",["Delete Particular Transaction","Delete the MF holding"],index=None,key="delete_mf")
+
+            if delete_mf == "Delete the MF holding":
+                asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset1), "asset"].tolist()
+                print(asset_list)
+                if asset_list:
+                    asset = st.selectbox(
+                        f"Select {option_asset1}",
+                        asset_list,
+                        index=None,
+                        placeholder=f"Select {option_asset1}",
+                        key="delete_asset"
+                    )
+                else:
+                    st.info("There is no holding under this Asset")
+            elif delete_mf == "Delete Particular Transaction":
+
+                st.markdown(
+                        f"""
+                        <p style="color:#D2691E; font-weight:bold; font-size:15px;">
+                             Please get Transaction id from Mutal Fund transaction table:
+                        </p>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                trans_id = st.number_input("Enter the transaction ID to delete", min_value=0)
+                if trans_id > 0:
+                    #['Transaction Id', 'Mutual Fund Scheme','Transaction Type','Invested','NAV','UNITS','Transaction Date']
+                    asset = mf_transactions.loc[mf_transactions["Transaction Id"]==10,"Mutual Fund Scheme"].item()
+                    type = mf_transactions.loc[mf_transactions["Transaction Id"]==10,"Transaction Type"].item()
+                    tdate =  mf_transactions.loc[mf_transactions["Transaction Id"]==10,"Date"].item()
+                    tunits = mf_transactions.loc[mf_transactions["Transaction Id"]==10,"UNITS"].item()
+
+                    st.markdown(
+                        f"""
+                        <p style="color:#ff6666; font-weight:bold; font-size:15px;">
+                            ⚠️ You are about to delete the following transaction:
+                        </p>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                    st.markdown(
+                        f"""
+                        <div style="
+                            padding:10px; 
+                            border:1px solid #444; 
+                            border-radius:8px; 
+                            background-color:#1e1e1e;
+                        ">
+                            <p style="font-weight:bold; font-size:16px; margin:0; color:#ffffff;">{asset}</p>
+                            <p style="color:#CD5C5C; margin:0;">Transaction Type : {type}</p>
+                            <p style="color:#CD5C5C; margin:0;">Transaction Date : {tdate}</p>
+                            <p style="color:#CD5C5C; margin:0;">Units : {tunits} units</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
 
         col_d1, col_d2 = st.columns([1,1])
 
         with col_d1:
-            if st.button("🗑️ DELETE", key="delete_button"):
-                if asset:
+            if st.button("🗑️ DELETE", key="delete_button", type="primary"):
+                if option_asset1 in ["Stock","Gold"] and asset:
                     st.info("Proceeding Delete")
-                    res = delete_portfolio(asset)
+                    try:
+                        res = delete_portfolio(asset.strip())
+                    except APIError as e:
+                        st.write(e)
+                        st.stop()
                     st.success("Portfolio Deleted")
                     reset_delete_state()
                     st.rerun()
+                if option_asset1 in ["Mutual Fund"] and asset:   # have to handle logic to delete from mf transactions , need to pass user id
+                    
+                    st.info("Proceeding Delete")
+
+                    if delete_mf == "Delete the MF holding":
+                        try:
+                            res = delete_portfolio(asset.strip())
+                            mf_Res = delete_mf_transaction(asset.strip())
+                        except APIError as e:
+                            st.write(e)
+                            st.stop()
+                        st.success("Portfolio Deleted")
+                        reset_delete_state()
+                        st.rerun()
+
+
+                    elif delete_mf == "Delete Particular Transaction":
+                        try:
+                            res = delete_mf_transaction_id(asset.strip(),trans_id)
+                            #need to handle the holding s of that particular trnsaction - either delete or subtract
+                        except APIError as e:
+                            st.write(e)
+                            st.stop()
+                        st.success("Transaction Deleted")
+                        reset_delete_state()
+                        st.rerun()
+
                 else:
                     st.error("Please select an asset to delete")
 
