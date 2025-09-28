@@ -267,37 +267,69 @@ with tab1:
                         print(dat)
                     except APIError as e:
                         error_data = e.args[0]
+                   
+                    if txn_type == "Buy":
+                        if not dat.data:
+                            try:
+                                ##insert
+                                response =  insert_mf_holdings(user_id,type,units,amout,fund) ##insert
+                                print(response)
+                                st.write("Success")
+                            except APIError as e:
+                                error_data = e.args[0]
+                                st.write("Failed to Add Transaction, Please try again")
+                                st.stop()
 
-                    if not dat.data:
-                        try:
-                            ##insert
-                            response =  insert_mf_holdings(user_id,type,units,amout,fund) ##insert
-                            print(response)
-                            st.write("Success")
-                        except APIError as e:
-                            error_data = e.args[0]
-                            st.write("Failed to Add Transaction, Please try again")
-                            st.stop()
+                        else:
+                            print("HERE")
+                            old_qty = dat.data[0].get("quantity")
+                            new_qty = units + old_qty
+                            print(new_qty)
+                            old_price = dat.data[0].get("average_price")
+                            new_price = float(old_price+amount)
+                            print(new_price)
+                            try:
+                                    update_mf_holdings = update_portfolio(new_qty,new_price,fund,user_id)
+                            except APIError as e:
+                                     error_data = e.args[0]  # APIError contains the dict you pasted
+                        
+                            if not update_mf_holdings:
+                                st.write("Failed to Add Transaction, Please try again")
+                                st.stop()
+                            else:
+                    
+                                st.write("Success")
 
                     else:
-                        print("HERE")
-                        old_qty = dat.data[0].get("quantity")
-                        new_qty = units + old_qty
-                        print(new_qty)
-                        old_price = dat.data[0].get("average_price")
-                        new_price = float(old_price+amount)
-                        print(new_price)
-                        try:
-                           update_mf_holdings = update_portfolio(new_qty,new_price,fund,user_id)
-                        except APIError as e:
-                             error_data = e.args[0]  # APIError contains the dict you pasted
-                        
-                        if not update_mf_holdings:
-                            st.write("Failed to Add Transaction, Please try again")
+                        print("Sell Trnsaction")
+                        # prefer sell as individual transaction
+                        if not dat.data:
+                            st.error(f"{fund} is not in your holdings to sell")
                             st.stop()
                         else:
-                 
-                            st.write("Success")
+                            old_qty = dat.data[0].get("quantity")
+                            old_price = dat.data[0].get("average_price")
+
+                            if units == old_qty:
+                                st.warning(
+                                    f"You are selling your entire holding in {fund}. "
+                                    f"Please use the 'Delete Holdings' option to complete this."
+                                )
+                                continue
+                            elif units > old_qty:
+                                 st.error(f"You cannot sell more units ({units}) than you hold ({old_qty}) for {fund} , Your transation stops here,Please check over the holdings and proceed with new transactions")
+                                 st.stop()
+                            else:
+                                new_holding_quantity = old_qty - units
+                                new_holding_price = old_price - amount
+                                asset = fund
+                                try:
+                                    print("updating the holding to specific")
+                                    update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),56)
+                                except APIError as e:
+                                    error_data = e.args[0]
+                                    st.write(error_data)
+                                    st.stop()
                 try:
                     res = insert_mf_transactions(mf_bulk_insert)
                     st.session_state["insert_success_mutual_fund"] = True
@@ -474,7 +506,7 @@ with tab3:
                         unsafe_allow_html=True
                     )
                 trans_id = st.number_input("Enter the transaction ID to delete", min_value=0)
-                if trans_id > 0:
+                if trans_id > 0:  #need to handle as if trans_id found in th e df, sometime after deleting it casuing error as it not found but it mostly due to no re run
                     #['Transaction Id', 'Mutual Fund Scheme','Transaction Type','Invested','NAV','UNITS','Transaction Date']
                     asset = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Mutual Fund Scheme"].item()
                     type = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Transaction Type"].item()
@@ -579,7 +611,6 @@ with tab3:
 
                         try:
                             res = delete_mf_transaction_id(asset.strip(),trans_id)
-                            #need to handle the holding s of that particular trnsaction - either delete or subtract
                         except APIError as e:
                             st.write(e)
                             st.stop()
