@@ -151,3 +151,12 @@ def delete_mf_transaction_id(asset,id):
 
     return response
 
+
+def get_mf_data_amount(user_id,asset):
+    return (
+        supabase.table("fet_portfolio_holdings")
+        .select("quantity","average_price")
+        .eq("user_id",user_id)
+        .eq("asset",asset)
+        .execute()
+    )

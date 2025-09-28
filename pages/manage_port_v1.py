@@ -476,10 +476,11 @@ with tab3:
                 trans_id = st.number_input("Enter the transaction ID to delete", min_value=0)
                 if trans_id > 0:
                     #['Transaction Id', 'Mutual Fund Scheme','Transaction Type','Invested','NAV','UNITS','Transaction Date']
-                    asset = mf_transactions.loc[mf_transactions["Transaction Id"]==10,"Mutual Fund Scheme"].item()
-                    type = mf_transactions.loc[mf_transactions["Transaction Id"]==10,"Transaction Type"].item()
-                    tdate =  mf_transactions.loc[mf_transactions["Transaction Id"]==10,"Date"].item()
-                    tunits = mf_transactions.loc[mf_transactions["Transaction Id"]==10,"UNITS"].item()
+                    asset = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Mutual Fund Scheme"].item()
+                    type = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Transaction Type"].item()
+                    tdate =  mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Date"].item()
+                    tunits = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"UNITS"].item()
+                    tamount = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Invested"].item()
 
                     st.markdown(
                         f"""
@@ -539,12 +540,51 @@ with tab3:
 
 
                     elif delete_mf == "Delete Particular Transaction":
+
+                        try:
+                           dats = get_mf_data(56,asset.strip())
+                           print("Here in Delete PT")
+                           print(dats)
+                        except APIError as e:
+                            error_data = e.args[0]
+                            st.stop()
+
+                        holding_qty = dats.data[0].get("quantity")
+                        holding_price = dats.data[0].get("average_price")
+                        print(holding_qty)
+                        print(tunits)
+                        print(holding_price)
+                        print(tamount)
+
+                        if((tunits == holding_qty ) and (holding_price == tamount)):
+                            print("Both are same , so entire transaction needs toi be deleted")
+
+                            try:
+                                print("Deleting the entire holding of the Mutual Fund Transaction")
+                                res = delete_portfolio(asset.strip())
+                            except APIError as e:
+                                st.write(e)
+                                st.stop()
+                        else:
+                            new_holding_quantity = holding_qty - tunits
+                            new_holding_price = holding_price - tamount
+                            try:
+                                print("updating the holding to specific")
+                                update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),56)
+                            except APIError as e:
+                                error_data = e.args[0]
+                                st.write(error_data)
+                                st.stop()
+
+
                         try:
                             res = delete_mf_transaction_id(asset.strip(),trans_id)
                             #need to handle the holding s of that particular trnsaction - either delete or subtract
                         except APIError as e:
                             st.write(e)
                             st.stop()
+
+
                         st.success("Transaction Deleted")
                         reset_delete_state()
                         st.rerun()
