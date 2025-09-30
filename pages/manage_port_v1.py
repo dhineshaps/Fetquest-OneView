@@ -88,6 +88,9 @@ cos_list = stock["NAME OF COMPANY"].tolist()
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
 fund_list = mf["Scheme Name"].tolist()
 
+mf_new = pd.read_csv('funds1.csv')
+column_names_index = mf_new .columns
+
 Gold_list= ["22K","24K"]
 
 
@@ -126,7 +129,10 @@ with tab1:
                     key=f"stock_{row}",
                 )
             elif asset_type == "Mutual Fund":
-                fund_name = st.selectbox("Mutual Fund Scheme", fund_list, index=None, key=f"mf_{row}")
+                mf_aums = st.selectbox("Mutual Fund", column_names_index)
+                funds_name = mf_new[mf_aums]
+                fund_name = st.selectbox("Mutual Fund Scheme", funds_name, index=None, key=f"mf_{row}")
+                #fund_name = st.selectbox("Mutual Fund Scheme", fund_list, index=None, key=f"mf_{row}")
                 txn_date = st.date_input("Transaction Date", pd.to_datetime("today"), key=f"date_{row}")
                 txn_type = st.selectbox("Transaction Type", ["Buy", "Sell"], key=f"txn_type_{row}")
 
@@ -573,43 +579,83 @@ with tab3:
 
                     elif delete_mf == "Delete Particular Transaction":
 
-                        try:
-                           dats = get_mf_data(56,asset.strip())
-                           print("Here in Delete PT")
-                           print(dats)
-                        except APIError as e:
-                            error_data = e.args[0]
-                            st.stop()
-
-                        holding_qty = dats.data[0].get("quantity")
-                        holding_price = dats.data[0].get("average_price")
-                        print(holding_qty)
-                        print(tunits)
-                        print(holding_price)
-                        print(tamount)
-
-                        if((tunits == holding_qty ) and (holding_price == tamount)):
-                            print("Both are same , so entire transaction needs toi be deleted")
+                        if type == "Buy":
 
                             try:
-                                print("Deleting the entire holding of the Mutual Fund Transaction")
-                                res = delete_portfolio(asset.strip())
-                            except APIError as e:
-                                st.write(e)
-                                st.stop()
-                        else:
-                            new_holding_quantity = holding_qty - tunits
-                            new_holding_price = holding_price - tamount
-                            try:
-                                print("updating the holding to specific")
-                                update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),56)
+                                dats = get_mf_data(56,asset.strip())
+                                print("Here in Delete PT")
+                                print(dats)
                             except APIError as e:
                                 error_data = e.args[0]
-                                st.write(error_data)
                                 st.stop()
+
+                            holding_qty = dats.data[0].get("quantity")
+                            holding_price = dats.data[0].get("average_price")
+                            print(holding_qty)
+                            print(tunits)
+                            print(holding_price)
+                            print(tamount)
+
+                            if((tunits == holding_qty ) and (holding_price == tamount)):
+                                print("Both are same , so entire transaction needs toi be deleted")
+
+                                try:
+                                    print("Deleting the entire holding of the Mutual Fund Transaction")
+                                    res = delete_portfolio(asset.strip())
+                                except APIError as e:
+                                    st.write(e)
+                                    st.stop()
+                            else:
+                                new_holding_quantity = holding_qty - tunits
+                                new_holding_price = holding_price - tamount
+                                try:
+                                    print("updating the holding to specific")
+                                    update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),56)
+                                except APIError as e:
+                                    error_data = e.args[0]
+                                    st.write(error_data)
+                                    st.stop()
+                        else:
+                            try:
+                                datdel = get_mf_data(56,asset.strip())
+                                print("Here in Delete PT")
+                                print(datdel)
+                            except APIError as e:
+                                error_data = e.args[0]
+                                st.stop()
+
+                            if not datdel.data:
+                                try:
+                                    response =  insert_mf_holdings(56,type,tunits,tamount,asset.strip()) ##insert
+                                    st.write("Success")
+                                except APIError as e:
+                                    error_data = e.args[0]
+                                    st.write("Failed to Revert Back the Transaction, Please try again")
+                                    st.stop()
+
+                            else:
+                                holding_qty = datdel.data[0].get("quantity")
+                                new_revert_add_qty = tunits
+                                holding_price = datdel.data[0].get("average_price")
+                                new_revert_add_price = tamount
+
+                                reverted_qty = holding_qty  + new_revert_add_qty
+                                reverted_price = float(holding_price+ new_revert_add_price)
+                                try:
+                                    print("Here in sell")
+                                    update_mf_holdings_reverted = update_portfolio(reverted_qty,reverted_price,asset.strip(),56)
+                                except APIError as e:
+                                     error_data = e.args[0]  # APIError contains the dict you pasted
+                    
+                                if not update_mf_holdings_reverted :
+                                    st.write("Failed to Add Transaction, Please try again")
+                                    st.stop()
+                                else:
+                                     st.write("Success")
 
 
                         try:
+                            #print("deleting the transaction")
                             res = delete_mf_transaction_id(asset.strip(),trans_id)
                         except APIError as e:
                             st.write(e)
