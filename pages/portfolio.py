@@ -2,6 +2,18 @@ import streamlit as st
 import uuid
 from utils import load_user_id
 
+# pages = {
+#     "Your account": [
+#         #st.Page("portfolio_view.py", title="portfolio"),
+#         st.Page("navi2.py", title="Manage your account"),
+#         st.Page("logout.py", title="Logout"),
+#     ],
+# }
+
+# pg = st.navigation(pages, position="top")
+# #pg.run()	
+
+
 # --- Initialize session state ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False

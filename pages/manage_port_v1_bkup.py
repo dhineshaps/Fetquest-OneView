@@ -27,9 +27,7 @@ if not st.session_state.logged_in:
 st.title("FETQuest OneView – Manage Portfolio")
 st.write(f"Welcome! Your User ID: {st.session_state.u_id}")
 
-user_id = st.session_state.u_id
-st.write(user_id)
-######################################## The Above to hanlde the session state ###############################
+
 #st.title("FETQuest OneView – Manage Portfolio")
 
 st.markdown(
@@ -60,14 +58,14 @@ st.markdown(
 
 # ---------------- READ HOLDING ----------------
 
-def show_holdings(user_id):  # user id needs to be passed
-    df = load_portfolio(user_id).reset_index(drop=True)
+def show_holdings():  # user id needs to be passed
+    df = load_portfolio().reset_index(drop=True)
     df.index = df.index + 1 
     df.index.name = "S.No"
     return df
 
 #portfolio_curd will be used in Update and Delete for filtering
-portfolio_curd = show_holdings(user_id)  # user id needs to be passed
+portfolio_curd = show_holdings()  # user id needs to be passed
 
 # print(portfolio_curd)
 
@@ -85,13 +83,13 @@ else:
 
 #----------------------------------------------------------------------------#
 
-def show_mf_transactions(user_id):  # user id needs to be passed
-    df = load_mf_transactions(user_id).reset_index(drop=True)
+def show_mf_transactions():  # user id needs to be passed
+    df = load_mf_transactions().reset_index(drop=True)
     df.index = df.index + 1 
     df.index.name = "S.No"
     return df
 
-mf_transactions = show_mf_transactions(user_id)  # user id needs to be passed
+mf_transactions = show_mf_transactions()  # user id needs to be passed
 
 if not mf_transactions.empty:
     mf_transactions.columns = ['Transaction Id', 'Mutual Fund Scheme','Transaction Type','Invested','NAV','UNITS','Transaction Date']
@@ -215,7 +213,7 @@ with tab1:
 
         if asset_type == "Stock":
             rows_data.append({
-                "user_id":user_id,
+                "user_id":56,
                 "type": st.session_state.get(f"type_{row}"),
                 "asset": st.session_state.get(f"stock_{row}"),
                 "symbol": cos_symbol,
@@ -225,7 +223,7 @@ with tab1:
         elif asset_type == "Mutual Fund":
 
             rows_data.append({
-                    "user_id":user_id,
+                    "user_id":56,
                     "type": "Mutual Fund",
                     "fund_name": fund_name,
                     "txn_date": str(txn_date),
@@ -236,7 +234,7 @@ with tab1:
                 })
         else:
             rows_data.append({
-                "user_id":user_id,
+                "user_id":56,
                 "type": st.session_state.get(f"type_{row}"),
                 "asset": st.session_state.get(f"gold_{row}"),
                 "symbol": "NA",
@@ -355,7 +353,7 @@ with tab1:
                                 asset = fund
                                 try:
                                     print("updating the holding to specific")
-                                    update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),user_id)
+                                    update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),56)
                                 except APIError as e:
                                     error_data = e.args[0]
                                     st.write(error_data)
@@ -456,7 +454,7 @@ with tab2:
                     if st.button("✅ Update Holding", key="update_button"):
                         if (qty_new != qty) or (avg_price_new != avg_price):
                             st.info("Proceeding update")
-                            res = update_portfolio(qty_new, avg_price_new, asset,user_id)
+                            res = update_portfolio(qty_new, avg_price_new, asset,56)
                             st.success("Portfolio updated")
                             st.toast("✅ Holdings Updated!", icon="🎉")
                             reset_update_state()
@@ -578,7 +576,7 @@ with tab3:
                 if option_asset1 in ["Stock","Gold"] and asset:
                     st.info("Proceeding Delete")
                     try:
-                        res = delete_portfolio(user_id,asset.strip())
+                        res = delete_portfolio(asset.strip())
                     except APIError as e:
                         st.write(e)
                         st.stop()
@@ -591,8 +589,8 @@ with tab3:
 
                     if delete_mf == "Delete the MF holding":
                         try:
-                            res = delete_portfolio(user_id,asset.strip())
-                            mf_Res = delete_mf_transaction(user_id,asset.strip())
+                            res = delete_portfolio(asset.strip())
+                            mf_Res = delete_mf_transaction(asset.strip())
                         except APIError as e:
                             st.write(e)
                             st.stop()
@@ -606,7 +604,7 @@ with tab3:
                         if type == "Buy":
 
                             try:
-                                dats = get_mf_data(user_id,asset.strip())
+                                dats = get_mf_data(56,asset.strip())
                                 print("Here in Delete PT")
                                 print(dats)
                             except APIError as e:
@@ -625,7 +623,7 @@ with tab3:
 
                                 try:
                                     print("Deleting the entire holding of the Mutual Fund Transaction")
-                                    res = delete_portfolio(user_id,asset.strip())
+                                    res = delete_portfolio(asset.strip())
                                 except APIError as e:
                                     st.write(e)
                                     st.stop()
@@ -634,14 +632,14 @@ with tab3:
                                 new_holding_price = holding_price - tamount
                                 try:
                                     print("updating the holding to specific")
-                                    update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),user_id)
+                                    update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),56)
                                 except APIError as e:
                                     error_data = e.args[0]
                                     st.write(error_data)
                                     st.stop()
                         else:
                             try:
-                                datdel = get_mf_data(user_id,asset.strip())
+                                datdel = get_mf_data(56,asset.strip())
                                 print("Here in Delete PT")
                                 print(datdel)
                             except APIError as e:
@@ -650,7 +648,7 @@ with tab3:
 
                             if not datdel.data:
                                 try:
-                                    response =  insert_mf_holdings(user_id,type,tunits,tamount,asset.strip()) ##insert
+                                    response =  insert_mf_holdings(56,type,tunits,tamount,asset.strip()) ##insert
                                     st.write("Success")
                                 except APIError as e:
                                     error_data = e.args[0]
@@ -667,7 +665,7 @@ with tab3:
                                 reverted_price = float(holding_price+ new_revert_add_price)
                                 try:
                                     print("Here in sell")
-                                    update_mf_holdings_reverted = update_portfolio(reverted_qty,reverted_price,asset.strip(),user_id)
+                                    update_mf_holdings_reverted = update_portfolio(reverted_qty,reverted_price,asset.strip(),56)
                                 except APIError as e:
                                      error_data = e.args[0]  # APIError contains the dict you pasted
                     
@@ -680,7 +678,7 @@ with tab3:
 
                         try:
                             #print("deleting the transaction")
-                            res = delete_mf_transaction_id(user_id,asset.strip(),trans_id)
+                            res = delete_mf_transaction_id(asset.strip(),trans_id)
                         except APIError as e:
                             st.write(e)
                             st.stop()

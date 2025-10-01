@@ -15,10 +15,10 @@ supabase: Client = create_client(url, key)
 
 
 #@st.cache_data(ttl=3600)
-def load_portfolio(user_id):
+def load_portfolio():
  
     try:
-        response_all_stock_data = supabase.table("fet_portfolio_holdings").select("type","quantity","average_price","asset","symbol").eq("user_id", user_id).execute()
+        response_all_stock_data = supabase.table("fet_portfolio_holdings").select("type","quantity","average_price","asset","symbol").eq("user_id", 56).execute()
     except APIError as e:
         print(e)
         response = st.error("Error in Retrieving the data, Retry after sometime")
@@ -27,10 +27,10 @@ def load_portfolio(user_id):
     return pd.DataFrame(data_all_stock_data)
 
 
-def load_mf_transactions(user_id):
+def load_mf_transactions():
  
     try:
-        response_all_mf_data = supabase.table("fet_portfolio_holdings_mf_transactions").select("id","fund_name","txn_type","amount","nav","units","created_at").eq("user_id", user_id).execute()
+        response_all_mf_data = supabase.table("fet_portfolio_holdings_mf_transactions").select("id","fund_name","txn_type","amount","nav","units","created_at").eq("user_id", 56).execute()
     except APIError as e:
         print(e)
         response = st.error("Error in Retrieving the data, Retry after sometime")
@@ -90,14 +90,14 @@ def update_portfolio(qty,avg_price,asset,user_id):
 
 
 
-def delete_portfolio(user_id,asset):
+def delete_portfolio(asset):
 
     try:
 
         response = (
             supabase.table("fet_portfolio_holdings")
             .delete()
-            .eq("user_id", user_id)
+            .eq("user_id", 56)
             .eq("asset", asset)
             .execute()
         )
@@ -111,14 +111,14 @@ def delete_portfolio(user_id,asset):
     return response
 
 
-def delete_mf_transaction(user_id,asset):
+def delete_mf_transaction(asset):
 
     try:
 
         response = (
             supabase.table("fet_portfolio_holdings_mf_transactions")
             .delete()
-            .eq("user_id", user_id)
+            .eq("user_id", 56)
             .eq("fund_name", asset)
             .execute()
         )
@@ -131,13 +131,13 @@ def delete_mf_transaction(user_id,asset):
 
     return response
 
-def delete_mf_transaction_id(user_id,asset,id):
+def delete_mf_transaction_id(asset,id):
     try:
 
         response = (
             supabase.table("fet_portfolio_holdings_mf_transactions")
             .delete()
-            .eq("user_id", user_id)
+            .eq("user_id", 56)
             .eq("id", id)
             .eq("fund_name", asset)
             .execute()

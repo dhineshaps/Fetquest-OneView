@@ -9,6 +9,18 @@ from gold_tm import get_gold_rates
 
 st.title("FETQuest OneView –  Portfolio")
 
+pages = {
+    "Your account": [
+        st.Page("portfolio_view.py", title="portfolio"),
+        st.Page("navi2.py", title="Manage your account"),
+        st.Page("logout.py", title="Logout"),
+    ],
+}
+
+pg = st.navigation(pages, position="top")
+pg.run()	
+
+
 def show_holdings():
     df = load_portfolio().reset_index(drop=True)
     df.index = df.index + 1 
