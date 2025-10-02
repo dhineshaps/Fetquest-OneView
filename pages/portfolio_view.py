@@ -7,6 +7,9 @@ import pandas as pd
 from stock import stock_data
 from gold_tm import get_gold_rates
 from utils import load_user_id
+from navbar import top_navbar
+
+st.set_page_config(page_title="View Portfolio", layout="wide")
 
 # --- Initialize session state ---
 if "logged_in" not in st.session_state:
@@ -25,13 +28,17 @@ if not st.session_state.logged_in:
     st.error("Please login first!")
     st.stop()
 
+st.session_state.current_page = "View Portfolio"  # update this for each page
+
+top_navbar()
+
 st.title("FETQuest OneView - Portfolio")
 
 user_id = st.session_state.u_id
 st.write(user_id)
 
-def show_holdings():
-    df = load_portfolio().reset_index(drop=True)
+def show_holdings(user_id):
+    df = load_portfolio(user_id).reset_index(drop=True)
     df.index = df.index + 1 
     df.index.name = "S.No"
     #st.dataframe(df, use_container_width=True)
@@ -39,7 +46,7 @@ def show_holdings():
     return df
 
 #portfolio_curd will be used in Update and Delete for filtering
-portfolio_curd = show_holdings()
+portfolio_curd = show_holdings(user_id)
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
 
 # st.write(portfolio_curd)
@@ -57,10 +64,10 @@ stock_portfolio, stock_df, on="symbol", how="left"
 ).drop_duplicates(subset=["symbol"])
 
 
-gold_df = get_gold_rates(gold_list)
-concatenated_df_gold = pd.merge(
-gold_portfolio, gold_df, on="asset", how="left"
-).drop_duplicates(subset=["asset"])
+# gold_df = get_gold_rates(gold_list)
+# concatenated_df_gold = pd.merge(
+# gold_portfolio, gold_df, on="asset", how="left"
+# ).drop_duplicates(subset=["asset"])
 
 tab1, tab2, tab3, tab4 = st.tabs(["Consolidated Portfolio", "Stock", "Mutual Fund","Gold"])
 
@@ -75,5 +82,6 @@ with tab3:
     st.write(mf_portfolio)
 
 with tab4:
-    st.write(concatenated_df_gold)
+    st.write("gold needs to be handled")
+    #st.write(concatenated_df_gold)
 

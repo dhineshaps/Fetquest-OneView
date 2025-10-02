@@ -6,6 +6,9 @@ import uuid
 from postgrest.exceptions import APIError
 from collections import defaultdict
 from utils import load_user_id
+from navbar import top_navbar
+
+st.set_page_config(page_title="Manage Portfolio", layout="wide")
 
 # --- Initialize session state ---
 if "logged_in" not in st.session_state:
@@ -26,6 +29,10 @@ if not st.session_state.logged_in:
 
 st.title("FETQuest OneView – Manage Portfolio")
 st.write(f"Welcome! Your User ID: {st.session_state.u_id}")
+
+st.session_state.current_page = "Manage Portfolio"
+
+top_navbar()
 
 user_id = st.session_state.u_id
 st.write(user_id)
