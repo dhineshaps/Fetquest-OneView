@@ -62,8 +62,8 @@ def login_form():
                         st.write(st.session_state.u_id)
                         save_user_id(str(u_id))
                         #st.rerun()
-                        #st.switch_page("pages/portfolio_view.py")
-                        st.switch_page("pages/naviga.py")
+                        st.switch_page("pages/portfolio_view.py")
+                        # st.switch_page("pages/naviga.py")
                         #manage_port_v1.py
                         #st.switch_page("pages/manage_port_v1.py")
                     else:

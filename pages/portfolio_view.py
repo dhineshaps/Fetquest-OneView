@@ -6,20 +6,29 @@ from postgrest.exceptions import APIError
 import pandas as pd
 from stock import stock_data
 from gold_tm import get_gold_rates
+from utils import load_user_id
+
+# --- Initialize session state ---
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "u_id" not in st.session_state:
+    st.session_state.u_id = None
+
+# If no u_id in session, try loading from storage
+if not st.session_state.u_id:
+    st.session_state.u_id = load_user_id()
+    st.session_state.logged_in = bool(st.session_state.u_id)
+
+
+# --- Block access if not logged in ---
+if not st.session_state.logged_in:
+    st.error("Please login first!")
+    st.stop()
 
 st.title("FETQuest OneView - Portfolio")
 
-pages = {
-    "Your account": [
-        st.Page("pages/portfolio_view.py", title="portfolio"),
-        st.Page("pages/navi2.py", title="Manage your account"),
-        st.Page("pages/logout.py", title="Logout"),
-    ],
-}
-
-pg = st.navigation(pages, position="top")
-pg.run()	
-
+user_id = st.session_state.u_id
+st.write(user_id)
 
 def show_holdings():
     df = load_portfolio().reset_index(drop=True)

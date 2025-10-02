@@ -6,7 +6,7 @@ st.set_page_config(page_title="View Portfolio", layout="wide")
 
 # --- Auth check ---
 if "authenticated" not in st.session_state or not st.session_state.authenticated:
-    st.switch_page("login.py")
+    st.switch_page("login_new")
     st.stop()
 
 # --- Track current page for highlighting ---

@@ -4,7 +4,6 @@ import urllib
 from navbar import top_navbar
 
 st.set_page_config(page_title="Manage Portfolio", layout="wide")
-
 # --- Auth check ---
 if "authenticated" not in st.session_state or not st.session_state.authenticated:
     st.switch_page("login.py")
@@ -15,8 +14,7 @@ st.session_state.current_page = "Manage Portfolio"
 
 top_navbar()
 
-# --- Page content ---
-st.title("fetquest")
-st.title("⚙️ Manage Portfolio")
+#st.title("fetquest")
+#st.title("⚙️ Manage Portfolio")
 st.write("Here you can manage your assets.")
 st.write(f"Welcome, {st.session_state.get('username', 'User')}")
