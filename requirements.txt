@@ -6,3 +6,4 @@ bcrypt
 extra-streamlit-components
 streamlit-cookies-manager
 streamlit-aggrid
+streamlit-navigation-bar

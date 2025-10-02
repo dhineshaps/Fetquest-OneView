@@ -18,6 +18,7 @@ supabase: Client = create_client(url, key)
 
 st.set_page_config(page_title="Login")
 
+
 def login_form():
     def check_password(password: str, hashed: str) -> bool:
         return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
@@ -61,7 +62,10 @@ def login_form():
                         st.write(st.session_state.u_id)
                         save_user_id(str(u_id))
                         #st.rerun()
-                        st.switch_page("pages/portfolio.py")
+                        #st.switch_page("pages/portfolio_view.py")
+                        st.switch_page("pages/naviga.py")
+                        #manage_port_v1.py
+                        #st.switch_page("pages/manage_port_v1.py")
                     else:
                         st.error("Invalid Credentials")
 
@@ -91,6 +95,7 @@ def main():
     if st.session_state.logged_in:
         if st.button("Logout"):
             logout()
+            st.experimental_rerun()
         st.write("You are logged in. Navigate to Profile or Dashboard.")
     else:
         st.title("🔐 Login Page")

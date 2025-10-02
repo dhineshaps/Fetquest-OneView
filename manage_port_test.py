@@ -47,11 +47,12 @@ def show_holdings():
 portfolio_curd = show_holdings()
 
 # Creating new Dataframe for user visualization with cosmetic changes.
-portfolio_dashboard = portfolio_curd
-portfolio_dashboard = portfolio_dashboard.drop("symbol", axis=1)
-portfolio_dashboard.columns = portfolio_dashboard.columns.str.capitalize()
-portfolio_dashboard ["Asset"] = portfolio_dashboard ["Asset"].str.upper()
-st.dataframe(portfolio_dashboard , use_container_width=True)
+# portfolio_dashboard = portfolio_curd
+# print(portfolio_dashboard)
+# portfolio_dashboard = portfolio_dashboard.drop("symbol", axis=1)
+# portfolio_dashboard.columns = portfolio_dashboard.columns.str.capitalize()
+# portfolio_dashboard ["Asset"] = portfolio_dashboard ["Asset"].str.upper()
+# st.dataframe(portfolio_dashboard , use_container_width=True)
 #----------------------------------------------------------------------------#
 
 

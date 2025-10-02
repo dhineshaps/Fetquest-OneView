@@ -7,13 +7,13 @@ import pandas as pd
 from stock import stock_data
 from gold_tm import get_gold_rates
 
-st.title("FETQuest OneView –  Portfolio")
+st.title("FETQuest OneView - Portfolio")
 
 pages = {
     "Your account": [
-        st.Page("portfolio_view.py", title="portfolio"),
-        st.Page("navi2.py", title="Manage your account"),
-        st.Page("logout.py", title="Logout"),
+        st.Page("pages/portfolio_view.py", title="portfolio"),
+        st.Page("pages/navi2.py", title="Manage your account"),
+        st.Page("pages/logout.py", title="Logout"),
     ],
 }
 
