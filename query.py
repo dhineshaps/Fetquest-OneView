@@ -30,7 +30,7 @@ def load_portfolio(user_id):
 def load_mf_transactions(user_id):
  
     try:
-        response_all_mf_data = supabase.table("fet_portfolio_holdings_mf_transactions").select("id","fund_name","txn_type","amount","nav","units","created_at").eq("user_id", user_id).execute()
+        response_all_mf_data = supabase.table("fet_portfolio_holdings_mf_transactions").select("id","fund_name","symbol","txn_date","txn_type","amount","nav","units","created_at").eq("user_id", user_id).execute()
     except APIError as e:
         print(e)
         response = st.error("Error in Retrieving the data, Retry after sometime")
@@ -54,10 +54,10 @@ def get_mf_data(user_id,asset):
         .execute()
     )
 
-def insert_mf_holdings(user_id,type,qty,avg_price,asset):
+def insert_mf_holdings(user_id,type,qty,avg_price,asset,fund_isin):
     return (
         supabase.table("fet_portfolio_holdings")
-        .insert({"user_id": user_id, "type": type,"asset": asset,"quantity": qty,"average_price":avg_price})
+        .insert({"user_id": user_id, "type": type,"asset": asset,"quantity": qty,"average_price":avg_price,"symbol":fund_isin})
         .execute()
     )
 

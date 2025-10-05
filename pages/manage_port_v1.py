@@ -101,7 +101,7 @@ def show_mf_transactions(user_id):  # user id needs to be passed
 mf_transactions = show_mf_transactions(user_id)  # user id needs to be passed
 
 if not mf_transactions.empty:
-    mf_transactions.columns = ['Transaction Id', 'Mutual Fund Scheme','Transaction Type','Invested','NAV','UNITS','Transaction Date']
+    mf_transactions.columns = ['Transaction Id', 'Mutual Fund Scheme','Symbol','Date','Transaction Type','Invested','NAV','UNITS','Transaction Date']
     mf_transactions["Transaction Date"] = pd.to_datetime(mf_transactions["Transaction Date"])
     mf_transactions["Date"] = mf_transactions["Transaction Date"].dt.date
     mf_transactions["Time"] = mf_transactions["Transaction Date"].dt.time
@@ -235,6 +235,7 @@ with tab1:
                     "user_id":user_id,
                     "type": "Mutual Fund",
                     "fund_name": fund_name,
+                    "symbol": str(fund_isin),
                     "txn_date": str(txn_date),
                     "txn_type": txn_type,
                     "amount": amount,
@@ -286,7 +287,7 @@ with tab1:
 
                  elif row["type"] == "Mutual Fund":
                     mf_txns.append((
-                      row["user_id"], row["type"], row["fund_name"], row["txn_date"], row["txn_type"],
+                      row["user_id"], row["type"], row["fund_name"], row["symbol"],row["txn_date"], row["txn_type"],
                         row["amount"], row["nav"], row["units"]
                     ))
 
@@ -297,7 +298,7 @@ with tab1:
             print("*************Here****************")
             if  mf_txns:
                 for i in mf_txns:
-                    user_id, type, fund, txn_date, txn_type, amout,nav, units = i
+                    user_id, type, fund,fund_isin,txn_date, txn_type, amout,nav, units = i
                     print(fund)
                     try:
                         dat = get_mf_data(user_id,fund)
@@ -309,7 +310,7 @@ with tab1:
                         if not dat.data:
                             try:
                                 ##insert
-                                response =  insert_mf_holdings(user_id,type,units,amout,fund) ##insert
+                                response =  insert_mf_holdings(user_id,type,units,amout,fund,fund_isin) ##insert
                                 print(response)
                                 st.write("Success")
                             except APIError as e:
@@ -368,6 +369,7 @@ with tab1:
                                     st.write(error_data)
                                     st.stop()
                 try:
+                    print(" Here in the bulk insert")
                     res = insert_mf_transactions(mf_bulk_insert)
                     st.session_state["insert_success_mutual_fund"] = True
                 except APIError as e:

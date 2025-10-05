@@ -43,6 +43,7 @@ create table public.fet_portfolio_holdings_mf_transactions (
     id bigserial primary key,
     user_id int not null,
     fund_name text not null,
+    symbol varchar(50),   
     txn_date date not null,
     txn_type text check (txn_type in ('Buy','Sell')) not null,
     amount numeric not null,

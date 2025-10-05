@@ -1,7 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
+import streamlit as st
+import pandas as pd
+gold_data = []
 
-def get_gold_rates():
+@st.cache_data
+def get_gold_rates(gold_list):
 
     url = "https://www.thangamayil.com/scheme/index/rateshistory/"
     response = requests.get(url)
@@ -27,8 +31,14 @@ def get_gold_rates():
              price = price_tag.text.strip().replace("₹", "").replace(",", "")
              metal_type = type_tag.text.strip()
              data_gold[metal_type] = price
-    return data_gold
-if __name__ == "__main__":
-    rates = get_gold_rates()
-    for metal, rate in rates.items():
-         print(f"{metal}: {rate}")
+        
+    
+    for gold in gold_list:
+        gold_type = f"Gold {gold}"
+        curent_price =data_gold.get(gold_type)
+        gold_data.append([gold,curent_price])
+
+    
+    df_gold_list = pd.DataFrame(gold_data, columns=["asset","Current price"])
+
+    return df_gold_list 
