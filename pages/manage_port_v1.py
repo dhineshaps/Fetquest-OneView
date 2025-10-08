@@ -15,11 +15,17 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "u_id" not in st.session_state:
     st.session_state.u_id = None
+if "u_name" not in st.session_state:
+    st.session_state.u_name = None
 
 # If no u_id in session, try loading from storage
 if not st.session_state.u_id:
     st.session_state.u_id = load_user_id()
     st.session_state.logged_in = bool(st.session_state.u_id)
+
+if not st.session_state.u_name:
+    st.session_state.u_name = load_user_name()
+    st.session_state.logged_in = bool(st.session_state.u_name)
 
 
 # --- Block access if not logged in ---
@@ -35,7 +41,9 @@ st.session_state.current_page = "Manage Portfolio"
 top_navbar()
 
 user_id = st.session_state.u_id
-st.write(user_id)
+#st.write(user_id)
+user_name = st.session_state.u_name
+st.write(f"👋 Hi, {user_name}!")
 ######################################## The Above to hanlde the session state ###############################
 #st.title("FETQuest OneView – Manage Portfolio")
 

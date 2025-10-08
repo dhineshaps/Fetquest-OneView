@@ -6,7 +6,7 @@ from postgrest.exceptions import APIError
 import pandas as pd
 from stock import stock_data
 from gold_tm import get_gold_rates
-from utils import load_user_id
+from utils import load_user_id,load_user_name
 from navbar import top_navbar
 from mf_nav_xirr import mf_data
 import plotly.express as px
@@ -18,12 +18,17 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "u_id" not in st.session_state:
     st.session_state.u_id = None
+if "u_name" not in st.session_state:
+    st.session_state.u_name = None
 
 # If no u_id in session, try loading from storage
 if not st.session_state.u_id:
     st.session_state.u_id = load_user_id()
     st.session_state.logged_in = bool(st.session_state.u_id)
 
+if not st.session_state.u_name:
+    st.session_state.u_name = load_user_name()
+    st.session_state.logged_in = bool(st.session_state.u_name)
 
 # --- Block access if not logged in ---
 if not st.session_state.logged_in:
@@ -37,8 +42,9 @@ top_navbar()
 st.title("FETQuest OneView - Portfolio")
 
 user_id = st.session_state.u_id
-st.write(user_id)
-
+#st.write(user_id)
+user_name = st.session_state.u_name
+st.write(f"👋 Hi, {user_name}!")
 total_invested_stock = 0.0
 total_invested_mf = 0.0
 total_invested_gold = 0.0

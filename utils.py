@@ -16,9 +16,19 @@ def save_user_id(user_id: str):
     cookies["u_id"] = str(user_id)
     cookies.save()   # 🔑 persist cookie
 
+def save_user_cookies(user_id: str, user_name: str):
+    """Save both user_id and user_name into cookies in a single call."""
+    cookies["u_id"] = str(user_id)
+    cookies["u_name"] = str(user_name)
+    cookies.save()
+
 def load_user_id() -> str | None:
     """Load user ID from cookie (if available)."""
     return cookies.get("u_id")
+
+def load_user_name() -> str | None:
+    """Load user ID from cookie (if available)."""
+    return cookies.get("u_name")
 
 def clear_user_id():
     """Remove user ID (logout)."""

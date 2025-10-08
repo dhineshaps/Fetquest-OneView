@@ -4,7 +4,7 @@ from supabase import create_client, Client
 import bcrypt
 from postgrest.exceptions import APIError
 import time
-from utils import save_user_id
+from utils import save_user_id, save_user_cookies
 
 url="https://anpufhhyswexjgwwddcy.supabase.co"
 key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFucHVmaGh5c3dleGpnd3dkZGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4NzM2ODEsImV4cCI6MjA1OTQ0OTY4MX0.aP4NCS53RezlAsBvAxmzqKUFYtL8azVRbsKnnGCTWmk"
@@ -51,21 +51,23 @@ def login_form():
                         try:     
                             user_id = (
                                 supabase.table("fet_portfolio_users")
-                                .select("user_id").eq("email", user_name).execute()
+                                .select("user_id","username").eq("email", user_name).execute()
                             )
                         except APIError as e:
                             st.error("Error in fetching the data, Retry after sometime")
                             
                         u_id = user_id.data[0]['user_id']
+                        print(user_id)
+                        u_name = user_id.data[0]['username']
                         st.session_state.logged_in=True
                         st.session_state.u_id = u_id
+                        st.session_state.u_name = u_name
                         st.write(st.session_state.u_id)
-                        save_user_id(str(u_id))
+                        st.write(st.session_state.u_name)
+                        #save_user_id(str(u_id))
+                        save_user_cookies(u_id, u_name)
                         #st.rerun()
                         st.switch_page("pages/portfolio_view.py")
-                        # st.switch_page("pages/naviga.py")
-                        #manage_port_v1.py
-                        #st.switch_page("pages/manage_port_v1.py")
                     else:
                         st.error("Invalid Credentials")
 
