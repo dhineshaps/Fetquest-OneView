@@ -69,11 +69,16 @@ def calculate_xirr_cagr_for_fund(df, current_nav=None):
     df: DataFrame with columns [txn_type, date, amount, units]
     current_nav: required if there are remaining unsold units
     """
+    if df.empty:
+        return 0.0
+    
     df = df.copy()
     df['txn_date'] = pd.to_datetime(df['txn_date'])
+    
 
     cashflows = []
     dates = []
+    total_units = 0
 
     # Step 1: Build cashflows for XIRR
     for _, row in df.iterrows():
@@ -104,6 +109,14 @@ def calculate_xirr_cagr_for_fund(df, current_nav=None):
             cf / (1 + rate) ** ((d - d0).days / 365)
             for cf, d in zip(cashflows, dates)
         ])
+    
+    if (max(dates) - min(dates)).days < 30:
+        return {
+            "XIRR": 0.0,
+            "CAGR": 0.0,
+            "Total Invested": df[df['txn_type'].str.lower() == 'buy']['amount'].sum(),
+            "Final Value": df[df['txn_type'].str.lower() == 'sell']['amount'].sum() + current_value
+        }
 
     def xirr(cashflows, dates, guess=0.1):
         tol = 1e-6
@@ -133,8 +146,12 @@ def calculate_xirr_cagr_for_fund(df, current_nav=None):
 
     if total_invested > 0 and total_years > 0:
         cagr_val = (final_value / total_invested) ** (1 / total_years) - 1
+        print(cagr_val)
     else:
         cagr_val = float('nan')
+
+    if (max(dates) - min(dates)).days < 30:
+        return 0.0
 
     return {
         "XIRR": xirr_val,
@@ -161,8 +178,8 @@ def mf_data(mf_list):
         nav_val = get_nav_from_mfapi(i)
         print(nav_val)
         result = calculate_xirr_cagr_for_fund(mf_df, current_nav=nav_val)
-        print(f"Symbol {i} → XIRR: {result['XIRR']:.2%}, CAGR: {result['CAGR']:.2%}, "
-              f"Invested: {result['Total Invested']:.0f}, Final Value: {result['Final Value']:.0f}")
+        # print(f"Symbol {i} → XIRR: {result['XIRR']:.2%}, CAGR: {result['CAGR']:.2%}, "
+        #       f"Invested: {result['Total Invested']:.0f}, Final Value: {result['Final Value']:.0f}")
         symbol=i
         xirr = f"{result['XIRR']:.2%}"
         CAGR= f"{result['CAGR']:.2%}"

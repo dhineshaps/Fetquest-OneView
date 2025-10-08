@@ -160,8 +160,8 @@ with tab1:
                     key=f"stock_{row}",
                 )
             elif asset_type == "Mutual Fund":
-                mf_aums = st.selectbox("Mutual Fund", column_names_index)
-                funds_name = mf_new[mf_aums]
+                mf_aums = st.selectbox("Mutual Fund", column_names_index, key=f"mf_sel_{row}")
+                funds_name = mf_new[mf_aums] 
                 fund_name = st.selectbox("Mutual Fund Scheme", funds_name, index=None, key=f"mf_{row}")
                 #fund_name = st.selectbox("Mutual Fund Scheme", fund_list, index=None, key=f"mf_{row}")
                 txn_date = st.date_input("Transaction Date", pd.to_datetime("today"), key=f"date_{row}")
@@ -450,12 +450,12 @@ with tab2:
 
             if asset:
                 qty = int(portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "quantity"].item())
-                if option_asset in ["Stock", "Mutual Fund"]:
+                if option_asset in ["Stock", "Mutual Fund","Gold"]:
                     avg_price = float(portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "average_price"].item())
 
                 qty_new = st.number_input("Quantity", min_value=1, value=qty, step=1, key="update_qty")
                 
-                if option_asset in ["Stock", "Mutual Fund"]:
+                if option_asset in ["Stock", "Mutual Fund","Gold"]:
                     avg_price_new = st.number_input("Average Price", min_value=0.1, value=avg_price, step=0.1, key="update_avg_price")
                 else:
                     avg_price_new = 0

@@ -8,3 +8,4 @@ streamlit-cookies-manager
 streamlit-aggrid
 streamlit-navigation-bar
 numpy_financial
+plotly
