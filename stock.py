@@ -26,6 +26,8 @@ def stock_data(stock_list):
         stock = yf.Ticker(scrip)
         CMP = stock .info.get("currentPrice","N/A")
         sector =  stock.info.get("sectorKey", "N/A")
+        pe = stock.info.get("trailingPE", "N/A")
+        eps =stock.info.get("trailingEps", "N/A")
         PB = stock.info.get("priceToBook")
         mcap = stock.info.get("marketCap")
         if mcap != "N/A":
@@ -33,10 +35,9 @@ def stock_data(stock_list):
         df = yf.download(scrip, period="1y")   
         week52High = round(df["High"].max().item(),2)
         week52Low = round(df["High"].min().item(),2)
-        #pe= stock.info.get('trailingPE',"NA")
-   
-        stock_df.append([stock_name,CMP,sector,PB, mcap,week52High,week52Low])
-    df_stock_list = pd.DataFrame(stock_df, columns=["symbol","Current price","Sector","PB Ratio","Market Cap","52Week High","52Week Low"])
+        stock_df.append([stock_name,CMP,sector,pe,eps,PB, mcap,week52High,week52Low])
+    df_stock_list = pd.DataFrame(stock_df, columns=["symbol","Current price","Sector","PE","EPS","PB Ratio","Market Cap","52Week High","52Week Low"])
+    print(df_stock_list)
     return df_stock_list
      
 

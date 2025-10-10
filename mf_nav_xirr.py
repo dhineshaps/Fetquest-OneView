@@ -55,11 +55,14 @@ def get_nav_from_mfapi(scheme_code):
     resp.raise_for_status()
     data = resp.json()
     # "data" is list of dicts with keys 'date' and 'nav'
+    scheme_category = data['meta']['scheme_category']
+    if not scheme_category:
+        scheme_category = "NA"
     nav_list = data.get("data", [])
     if not nav_list:
         raise ValueError("No data found for scheme code")
     latest = nav_list[-1]
-    return float(latest["nav"])
+    return float(latest["nav"]),scheme_category
 
 
 
@@ -175,7 +178,7 @@ def mf_data(mf_list):
     for i in mf_list:
         #mf_df = df_fund_sch[df_fund_sch["symbol"] == i].copy()
         mf_df = mf_transactions[mf_transactions["symbol"] == i].copy()
-        nav_val = get_nav_from_mfapi(i)
+        nav_val,scheme_category = get_nav_from_mfapi(i)
         print(nav_val)
         result = calculate_xirr_cagr_for_fund(mf_df, current_nav=nav_val)
         # print(f"Symbol {i} → XIRR: {result['XIRR']:.2%}, CAGR: {result['CAGR']:.2%}, "
@@ -185,9 +188,9 @@ def mf_data(mf_list):
         CAGR= f"{result['CAGR']:.2%}"
         invested = f"{result['Total Invested']:.0f}"
         current_amount = f"{result['Final Value']:.0f}"
-        mf_rets.append([symbol,xirr,CAGR,invested,current_amount])
+        mf_rets.append([symbol,scheme_category,xirr,CAGR,invested,current_amount])
 
-    mf_returns = pd.DataFrame(mf_rets, columns=["symbol","xirr","cagr","invested","current_amount"])
+    mf_returns = pd.DataFrame(mf_rets, columns=["symbol","scheme_category","xirr","cagr","invested","current_amount"])
 
     return mf_returns
 

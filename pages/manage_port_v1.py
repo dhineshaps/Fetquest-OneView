@@ -7,6 +7,7 @@ from postgrest.exceptions import APIError
 from collections import defaultdict
 from utils import load_user_id
 from navbar import top_navbar
+from utils import load_user_id,load_user_name
 
 st.set_page_config(page_title="Manage Portfolio", layout="wide")
 
@@ -34,7 +35,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 st.title("FETQuest OneView – Manage Portfolio")
-st.write(f"Welcome! Your User ID: {st.session_state.u_id}")
+#st.write(f"Welcome! Your User ID: {st.session_state.u_id}")
 
 st.session_state.current_page = "Manage Portfolio"
 
@@ -460,6 +461,9 @@ with tab2:
                 qty = int(portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "quantity"].item())
                 if option_asset in ["Stock", "Mutual Fund","Gold"]:
                     avg_price = float(portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "average_price"].item())
+                    if option_asset == "Gold" and avg_price == 0.0:
+                          avg_price = 0.1
+                    print(f"avg price",{avg_price})
 
                 qty_new = st.number_input("Quantity", min_value=1, value=qty, step=1, key="update_qty")
                 
