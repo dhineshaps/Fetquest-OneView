@@ -73,10 +73,20 @@ def calculate_xirr_cagr_for_fund(df, current_nav=None):
     current_nav: required if there are remaining unsold units
     """
     if df.empty:
-        return 0.0
+        #   return 0.0
+        return {
+            "XIRR": 0.0,
+            "CAGR": 0.0,
+            "Total Invested": 0.0,
+            "Final Value": 0.0
+        }
     
     df = df.copy()
-    df['txn_date'] = pd.to_datetime(df['txn_date'])
+    #df['txn_date'] = pd.to_datetime(df['txn_date'])
+    df["txn_date"] = pd.to_datetime(df["txn_date"], errors="coerce")
+    df["amount"] = pd.to_numeric(df["amount"], errors="coerce").fillna(0)
+    df["units"] = pd.to_numeric(df["units"], errors="coerce").fillna(0)
+    df = df.dropna(subset=["txn_date"])
     
 
     cashflows = []
@@ -121,20 +131,39 @@ def calculate_xirr_cagr_for_fund(df, current_nav=None):
             "Final Value": df[df['txn_type'].str.lower() == 'sell']['amount'].sum() + current_value
         }
 
+    # def xirr(cashflows, dates, guess=0.1):
+    #     tol = 1e-6
+    #     max_iter = 100
+    #     rate = guess
+    #     for _ in range(max_iter):
+    #         f = xnpv(rate, cashflows, dates)
+    #         f_deriv = (xnpv(rate + tol, cashflows, dates) - f) / tol
+    #         if f_deriv == 0:
+    #             return float('nan')
+    #         new_rate = rate - f / f_deriv
+    #         if abs(new_rate - rate) < tol:
+    #             return new_rate
+    #         rate = new_rate
+    #     return float('nan')
     def xirr(cashflows, dates, guess=0.1):
-        tol = 1e-6
-        max_iter = 100
-        rate = guess
-        for _ in range(max_iter):
-            f = xnpv(rate, cashflows, dates)
-            f_deriv = (xnpv(rate + tol, cashflows, dates) - f) / tol
-            if f_deriv == 0:
-                return float('nan')
-            new_rate = rate - f / f_deriv
-            if abs(new_rate - rate) < tol:
-                return new_rate
-            rate = new_rate
-        return float('nan')
+        try:
+            tol = 1e-6
+            max_iter = 100
+            rate = guess
+            for _ in range(max_iter):
+                f = xnpv(rate, cashflows, dates)
+                f_deriv = (xnpv(rate + tol, cashflows, dates) - f) / tol
+                if f_deriv == 0:
+                    return float("nan")
+                new_rate = rate - f / f_deriv
+                if abs(new_rate - rate) < tol:
+                    return new_rate
+                rate = new_rate
+            return float("nan")
+        except Exception as e:
+            print("XIRR calc error:", e)
+            return float("nan")
+
 
     xirr_val = xirr(cashflows, dates)
 
@@ -147,18 +176,33 @@ def calculate_xirr_cagr_for_fund(df, current_nav=None):
     total_redeemed = df[df['txn_type'] == 'Sell']['amount'].sum()
     final_value = total_redeemed + current_value
 
-    if total_invested > 0 and total_years > 0:
-        cagr_val = (final_value / total_invested) ** (1 / total_years) - 1
-        print(cagr_val)
-    else:
-        cagr_val = float('nan')
+    # if total_invested > 0 and total_years > 0:
+    #     cagr_val = (final_value / total_invested) ** (1 / total_years) - 1
+    #     print(cagr_val)
+    # else:
+    #     cagr_val = float('nan')
 
-    if (max(dates) - min(dates)).days < 30:
-        return 0.0
+    # if (max(dates) - min(dates)).days < 30:
+    #     return 0.0
 
+    try:
+        if total_invested > 0 and total_years > 0:
+            cagr_val = (final_value / total_invested) ** (1 / total_years) - 1
+        else:
+            cagr_val = float("nan")
+    except Exception:
+        cagr_val = float("nan")
+
+
+    # return {
+    #     "XIRR": xirr_val,
+    #     "CAGR": cagr_val,
+    #     "Total Invested": total_invested,
+    #     "Final Value": final_value
+    # }
     return {
-        "XIRR": xirr_val,
-        "CAGR": cagr_val,
+        "XIRR": xirr_val if pd.notna(xirr_val) else 0.0,
+        "CAGR": cagr_val if pd.notna(cagr_val) else 0.0,
         "Total Invested": total_invested,
         "Final Value": final_value
     }

@@ -35,6 +35,7 @@ create table public.fet_portfolio_holdings (
     symbol varchar(50),                 -- RELIANCE.NS (nullable for MF/Gold)
     quantity numeric not null,          -- units / shares / grams
     average_price numeric not null,     -- avg NAV or avg buy price
+    average_nav numeric,
     last_updated_date date not null default current_date
 );
 
@@ -51,3 +52,7 @@ create table public.fet_portfolio_holdings_mf_transactions (
     units numeric not null,
     created_at timestamp default now()
 );
+
+
+alter table fet_portfolio_holdings
+add column average_nav numeric;

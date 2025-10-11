@@ -12,6 +12,7 @@ from mf_nav_xirr import mf_data
 import plotly.express as px
 from consolidated_view import consolidated_data
 from stock_view import stock_data_graph
+from mf_view import mfdata_graph
 
 st.set_page_config(page_title="View Portfolio", layout="wide")
 
@@ -93,10 +94,11 @@ if cos_list:
     concatenated_df_stock = pd.merge(
     stock_portfolio, stock_df, on="symbol", how="left"
     ).drop_duplicates(subset=["symbol"])
-    stock_view_df = concatenated_df_stock.copy() #created copy as market cap data getting null  value
+    #stock_view_df = concatenated_df_stock.copy() #created copy as market cap data getting null  value
     concatenated_df_stock["Invested Amount"] = concatenated_df_stock["quantity"] *concatenated_df_stock["average_price"]
     concatenated_df_stock["Current Value"] = concatenated_df_stock["quantity"] *concatenated_df_stock["Current price"]
     concatenated_df_stock["Profit/Loss"] =  concatenated_df_stock["Current Value"] - concatenated_df_stock["Invested Amount"]
+    stock_view_df = concatenated_df_stock.copy()
     numeric_cols = ["EPS", "Profit/Loss", "Market Cap"]
     for col in numeric_cols:
          concatenated_df_stock[col] = pd.to_numeric(concatenated_df_stock[col], errors="coerce")
@@ -119,6 +121,7 @@ if mf_isin_list:
     concatenated_df_mf.index = concatenated_df_mf.index + 1 
     total_invested_mf = concatenated_df_mf["invested"].sum()
     total_current_amount_mf =  concatenated_df_mf["current_amount"].sum()
+    print(concatenated_df_mf.columns)
 
    
 if gold_list:
@@ -143,7 +146,7 @@ with tab2:
         print(stock_view_df.columns)
         print(concatenated_df_stock.columns)
         st.dataframe(stock_view_df)
-        stock_data_graph(concatenated_df_stock,total_invested_stock,total_current_amount_stock)
+        stock_data_graph(stock_view_df,total_invested_stock,total_current_amount_stock)
     else:
         st.info("Stocks are not in you portfolio")
 
@@ -153,6 +156,7 @@ with tab3:
     #st.write(mf_transactions)
     #st.write(mf_df)
     st.write(concatenated_df_mf)
+    mfdata_graph(concatenated_df_mf,total_invested_mf,total_current_amount_mf)
     #df_fund_sch[(df_fund_sch["symbol"] == 124178)]
 
 with tab4:

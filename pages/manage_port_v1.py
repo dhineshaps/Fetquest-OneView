@@ -368,7 +368,8 @@ with tab1:
                                  st.stop()
                             else:
                                 new_holding_quantity = old_qty - units
-                                new_holding_price = old_price - amount
+                                #new_holding_price = old_price - amount
+                                new_holding_price = old_price * (new_holding_quantity / old_qty)
                                 asset = fund
                                 try:
                                     print("updating the holding to specific")
