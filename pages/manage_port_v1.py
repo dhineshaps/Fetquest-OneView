@@ -137,7 +137,7 @@ cos_list = stock["NAME OF COMPANY"].tolist()
 # fund_list = mf["Scheme Name"].tolist()
 
 # mf_new = pd.read_csv('funds1.csv')
-# column_names_index = mf_new .columns
+# column_names_index = mf_new .columns #test
 
 @st.cache_data(show_spinner="Loading mutual fund data...")
 def load_fund_data():

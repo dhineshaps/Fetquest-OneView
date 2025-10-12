@@ -39,4 +39,4 @@ for j in cols_list:
 
 df = pd.DataFrame.from_dict(funds_by_amc_new, orient="index").transpose()
 
-df.to_csv("pages/funds1.csv", index=False, encoding="utf-8")
+df.to_csv("funds1.csv", index=False, encoding="utf-8")
