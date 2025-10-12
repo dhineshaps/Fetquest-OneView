@@ -2,20 +2,25 @@ import yfinance as yf
 import pandas as pd
 import streamlit as st
 
-def format_market_cap(market_cap: float) -> str:
-    crore_value = int(round(market_cap / 1e7))  # convert to crore
+def format_market_cap(market_cap: float) -> tuple[str, str]:
 
-    # Convert to string with Indian comma style
-    s = str(crore_value)
-    last3 = s[-3:]
-    rest = s[:-3]
-    if rest:
-        rest = ",".join([rest[max(i-2,0):i] for i in range(len(rest),0,-2)][::-1])
-        formatted = rest + "," + last3
+    if market_cap > 1e10:
+        crore_value = market_cap / 1e7
     else:
-        formatted = last3
+        crore_value = market_cap
 
-    return f"{formatted} Cr"
+    if crore_value >= 47000:
+        csize = "Large Cap"
+    elif 14000 <= crore_value < 47000:
+        csize = "Mid Cap"
+    else:
+        csize = "Small Cap"
+    
+    s = f"{int(round(crore_value)):,}"
+    s = s.replace(",", "X")[::-1].replace("X", ",", 1)[::-1] #to get indian style commas
+    formatted = s + " Cr"
+
+    return formatted , csize
 
 stock_df = []
 
@@ -31,17 +36,21 @@ def stock_data(stock_list):
         PB = stock.info.get("priceToBook")
         mcap = stock.info.get("marketCap","N/A")
         if mcap != "N/A":
-            mcap_formated = format_market_cap(stock.info.get("marketCap"))
+            mcap_formated,csize = format_market_cap(stock.info.get("marketCap"))
         df = yf.download(scrip, period="1y")   
         week52High = round(df["High"].max().item(),2)
         week52Low = round(df["High"].min().item(),2)
-        stock_df.append([stock_name,CMP,sector,pe,eps,PB, mcap,mcap_formated,week52High,week52Low])
-    df_stock_list = pd.DataFrame(stock_df, columns=["symbol","Current price","Sector","PE","EPS","PB Ratio","Market Cap Num","Market Cap","52Week High","52Week Low"])
+        stock_df.append([stock_name,CMP,sector,pe,eps,PB, mcap,mcap_formated,csize,week52High,week52Low])
+    df_stock_list = pd.DataFrame(stock_df, columns=["symbol","Current price","Sector","PE","EPS","PB Ratio","Market Cap Num","Market Cap","Company Size","52Week High","52Week Low"])
     print(df_stock_list)
     return df_stock_list
      
 
 
+
+#2000000000000 - large cap
+#>50000000000 - small
+#50000000000 - 200000000000000 - mid
 
 
 # stock_list = ["ITC","RELIANCE"]

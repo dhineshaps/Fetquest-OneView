@@ -95,7 +95,8 @@ if not portfolio_dashboard.empty:
     portfolio_dashboard = portfolio_dashboard.drop("symbol", axis=1)
     portfolio_dashboard.columns = portfolio_dashboard.columns.str.capitalize()
     portfolio_dashboard ["Asset"] = portfolio_dashboard ["Asset"].str.upper()
-    st.dataframe(portfolio_dashboard , use_container_width=True)
+    with st.expander("View your holdings"):
+        st.dataframe(portfolio_dashboard , use_container_width=True)
 else:
     st.write("Portfolio is Empty")
 
@@ -115,21 +116,35 @@ if not mf_transactions.empty:
     mf_transactions["Date"] = mf_transactions["Transaction Date"].dt.date
     mf_transactions["Time"] = mf_transactions["Transaction Date"].dt.time
     mf_transactions =  mf_transactions.drop("Transaction Date",axis=1)
-    st.dataframe(mf_transactions , use_container_width=True)
+    with st.expander("View your MF transactions"):
+        st.dataframe(mf_transactions , use_container_width=True)
 else:
     st.write("No Mutual Fund Transactions Recorded")
 
 
 # ---------------- ADD HOLDING ----------------
-stock = pd.read_csv("nse_equity.csv")
+
+@st.cache_data(show_spinner="Loading stock list data...")
+def load_stock_list():
+    return pd.read_csv("nse_equity.csv", low_memory=False)
+
+# stock = pd.read_csv("nse_equity.csv")
+stock = load_stock_list()
 stock["NAME OF COMPANY"] = stock["NAME OF COMPANY"].str.lower()
 cos_list = stock["NAME OF COMPANY"].tolist()
 
-mf= pd.read_csv("amfi_mutual_fund_list.csv")
-fund_list = mf["Scheme Name"].tolist()
+# mf= pd.read_csv("amfi_mutual_fund_list.csv")
+# fund_list = mf["Scheme Name"].tolist()
 
-mf_new = pd.read_csv('funds1.csv')
-column_names_index = mf_new .columns
+# mf_new = pd.read_csv('funds1.csv')
+# column_names_index = mf_new .columns
+
+@st.cache_data(show_spinner="Loading mutual fund data...")
+def load_fund_data():
+    return pd.read_csv("funds1.csv", low_memory=False)
+
+mf_new = load_fund_data()
+column_names_index = mf_new.columns
 
 Gold_list= ["22K","24K"]
 
