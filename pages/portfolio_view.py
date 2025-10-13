@@ -13,7 +13,7 @@ import plotly.express as px
 from consolidated_view import consolidated_data
 from stock_view import stock_data_graph
 from mf_view import mfdata_graph
-
+from gold_view import gold_data_graph  
 st.set_page_config(page_title="View Portfolio", layout="wide")
 
 # --- Initialize session state ---
@@ -88,53 +88,57 @@ gold_list = gold_portfolio['asset'].tolist()
 mf_transactions = show_mf_transactions(user_id)
 
 if cos_list:
-    stock_df = stock_data(cos_list)
-    print("in portfolio view")
-    print(stock_df)
-    concatenated_df_stock = pd.merge(
-    stock_portfolio, stock_df, on="symbol", how="left"
-    ).drop_duplicates(subset=["symbol"])
-    #stock_view_df = concatenated_df_stock.copy() #created copy as market cap data getting null  value
-    concatenated_df_stock["Invested Amount"] = concatenated_df_stock["quantity"] *concatenated_df_stock["average_price"]
-    concatenated_df_stock["Current Value"] = concatenated_df_stock["quantity"] *concatenated_df_stock["Current price"]
-    concatenated_df_stock["Profit/Loss"] =  concatenated_df_stock["Current Value"] - concatenated_df_stock["Invested Amount"]
-    stock_view_df = concatenated_df_stock.copy()
-    numeric_cols = ["EPS", "Profit/Loss", "Market Cap"]
-    for col in numeric_cols:
-         concatenated_df_stock[col] = pd.to_numeric(concatenated_df_stock[col], errors="coerce")
-    concatenated_df_stock.index = concatenated_df_stock.index + 1 
-    #st.write(concatenated_df_stock)
-    total_invested_stock = concatenated_df_stock["Invested Amount"].sum()
-    total_current_amount_stock = concatenated_df_stock["Current Value"].sum()
-    print(concatenated_df_stock.columns)
+    with st.spinner("Fetching Stock Details..."):
+        stock_df = stock_data(cos_list)
+        #print("in portfolio view")
+        #print(stock_df)
+        concatenated_df_stock = pd.merge(
+        stock_portfolio, stock_df, on="symbol", how="left"
+        ).drop_duplicates(subset=["symbol"])
+        #stock_view_df = concatenated_df_stock.copy() #created copy as market cap data getting null  value
+        concatenated_df_stock["Invested Amount"] = concatenated_df_stock["quantity"] *concatenated_df_stock["average_price"]
+        concatenated_df_stock["Current Value"] = concatenated_df_stock["quantity"] *concatenated_df_stock["Current price"]
+        concatenated_df_stock["Profit/Loss"] =  concatenated_df_stock["Current Value"] - concatenated_df_stock["Invested Amount"]
+        stock_view_df = concatenated_df_stock.copy()
+        numeric_cols = ["EPS", "Profit/Loss", "Market Cap"]
+        for col in numeric_cols:
+            concatenated_df_stock[col] = pd.to_numeric(concatenated_df_stock[col], errors="coerce")
+        concatenated_df_stock.index = concatenated_df_stock.index + 1 
+        #st.write(concatenated_df_stock)
+        total_invested_stock = concatenated_df_stock["Invested Amount"].sum()
+        total_current_amount_stock = concatenated_df_stock["Current Value"].sum()
+        #print(concatenated_df_stock.columns)
 
 
 if mf_isin_list:
-    mf_df = mf_data(mf_isin_list)
-    #st.write(mf_df)
-    mf_df["invested"] = pd.to_numeric(mf_df["invested"], errors="coerce") #converting to numeric from string
-    mf_df["current_amount"] = pd.to_numeric(mf_df["current_amount"], errors="coerce") #converting to numeric from string
-    concatenated_df_mf = pd.merge(
-    mf_portfolio, mf_df, on="symbol", how="left"
-    ).drop_duplicates(subset=["symbol"])
-    #st.write(concatenated_df_mf)
-    concatenated_df_mf.index = concatenated_df_mf.index + 1 
-    total_invested_mf = concatenated_df_mf["invested"].sum()
-    total_current_amount_mf =  concatenated_df_mf["current_amount"].sum()
-    print(concatenated_df_mf.columns)
+    with st.spinner("Calculating XIRR and CAGR for your funds..."):
+        mf_df = mf_data(mf_isin_list)
+        #st.write(mf_df)
+        mf_df["invested"] = pd.to_numeric(mf_df["invested"], errors="coerce") #converting to numeric from string
+        mf_df["current_amount"] = pd.to_numeric(mf_df["current_amount"], errors="coerce") #converting to numeric from string
+        concatenated_df_mf = pd.merge(
+        mf_portfolio, mf_df, on="symbol", how="left"
+        ).drop_duplicates(subset=["symbol"])
+        #st.write(concatenated_df_mf)
+        concatenated_df_mf.index = concatenated_df_mf.index + 1 
+        total_invested_mf = concatenated_df_mf["invested"].sum()
+        total_current_amount_mf =  concatenated_df_mf["current_amount"].sum()
+    #print(concatenated_df_mf.columns)
 
    
 if gold_list:
+    with st.spinner("Calculating Gold Data..."):
+        gold_df = get_gold_rates(gold_list)
+        concatenated_df_gold = pd.merge(
+        gold_portfolio, gold_df, on="asset", how="left"
+        ).drop_duplicates(subset=["asset"])
+        concatenated_df_gold["average_price"] = pd.to_numeric(concatenated_df_gold["average_price"], errors="coerce") #converting to numeric from string
+        concatenated_df_gold["Current price"] = pd.to_numeric(concatenated_df_gold["Current price"], errors="coerce") #converting to numeric from string
+        concatenated_df_gold.index = concatenated_df_gold.index + 1 
+        print( concatenated_df_gold.columns)
+        total_invested_gold =  concatenated_df_gold["average_price"].sum()
+        total_current_amount_gold = concatenated_df_gold["Current price"].sum()
 
-    gold_df = get_gold_rates(gold_list)
-    concatenated_df_gold = pd.merge(
-    gold_portfolio, gold_df, on="asset", how="left"
-    ).drop_duplicates(subset=["asset"])
-    concatenated_df_gold["average_price"] = pd.to_numeric(concatenated_df_gold["average_price"], errors="coerce") #converting to numeric from string
-    concatenated_df_gold["Current price"] = pd.to_numeric(concatenated_df_gold["Current price"], errors="coerce") #converting to numeric from string
-    concatenated_df_gold.index = concatenated_df_gold.index + 1 
-    total_invested_gold =  concatenated_df_gold["average_price"].sum()
-    total_current_amount_gold = concatenated_df_gold["Current price"].sum()
 
 
 tab1, tab2, tab3, tab4 = st.tabs(["Consolidated Portfolio", "Stock", "Mutual Fund","Gold"])
@@ -143,8 +147,8 @@ with tab1:
     consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold,total_current_amount_stock,total_current_amount_mf,total_current_amount_gold)
 with tab2:
     if cos_list:
-        print(stock_view_df.columns)
-        print(concatenated_df_stock.columns)
+        #print(stock_view_df.columns)
+        #print(concatenated_df_stock.columns)
         st.dataframe(stock_view_df)
         stock_data_graph(stock_view_df,total_invested_stock,total_current_amount_stock)
     else:
@@ -162,6 +166,9 @@ with tab3:
 with tab4:
     if gold_list:
         st.write(concatenated_df_gold)  #possible to remove sysmbol ?
+        st.write(total_invested_gold)
+        st.write(total_current_amount_gold)
+        gold_data_graph(concatenated_df_gold,total_invested_gold,total_current_amount_gold)
     else:
         st.info("Gold is not in you portfolio")
 

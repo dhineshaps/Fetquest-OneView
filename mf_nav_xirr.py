@@ -208,31 +208,43 @@ def calculate_xirr_cagr_for_fund(df, current_nav=None):
     }
 
 
-# df_fund_sch = pd.DataFrame([
-#     {"txn_type": "Buy", "date": "2020-01-01", "amount": 1000, "units": 100,"symbol":128628},
-#     {"txn_type": "Buy", "date": "2021-01-01", "amount": 1000, "units": 80,"symbol":128628},
-#     {"txn_type": "Sell", "date": "2023-01-01", "amount": 500, "units": 20,"symbol":128628},
-#     {"txn_type": "Buy", "date": "2024-01-01", "amount": 1000, "units": 90,"symbol":151109},
-# ])
-
-
 mf_rets = []
 
 def mf_data(mf_list):
+    mf_rets.clear()
     for i in mf_list:
         #mf_df = df_fund_sch[df_fund_sch["symbol"] == i].copy()
         mf_df = mf_transactions[mf_transactions["symbol"] == i].copy()
-        nav_val,scheme_category = get_nav_from_mfapi(i)
+        if mf_df.empty:
+            print(f"No transactions for {i}, skipping")
+            continue
+        try:
+            nav_val,scheme_category = get_nav_from_mfapi(i)
+        except Exception as e:
+            print(f"Failed to get NAV for {i}: {e}")
+            scheme_category = "NA"
+            nav_val = 0.0
+        print("here in creating nav for ",i)
         print(nav_val)
+        print(scheme_category)
+        print("here is creating nav")
         result = calculate_xirr_cagr_for_fund(mf_df, current_nav=nav_val)
-        # print(f"Symbol {i} → XIRR: {result['XIRR']:.2%}, CAGR: {result['CAGR']:.2%}, "
-        #       f"Invested: {result['Total Invested']:.0f}, Final Value: {result['Final Value']:.0f}")
+        print(f"Symbol {i} → XIRR: {result['XIRR']:.2%}, CAGR: {result['CAGR']:.2%}, "
+              f"Invested: {result['Total Invested']:.0f}, Final Value: {result['Final Value']:.0f}")
         symbol=i
-        xirr = f"{result['XIRR']:.2%}"
-        CAGR= f"{result['CAGR']:.2%}"
-        invested = f"{result['Total Invested']:.0f}"
-        current_amount = f"{result['Final Value']:.0f}"
-        mf_rets.append([symbol,scheme_category,xirr,CAGR,invested,current_amount])
+        # xirr = f"{result['XIRR']:.2%}"
+        # CAGR= f"{result['CAGR']:.2%}"
+        # invested = f"{result['Total Invested']:.0f}"
+        # current_amount = f"{result['Final Value']:.0f}"
+        #mf_rets.append([symbol,scheme_category,xirr,CAGR,invested,current_amount])
+        mf_rets.append([
+            symbol,
+            scheme_category,
+            result["XIRR"],          # keep numeric
+            result["CAGR"],          # keep numeric
+            result["Total Invested"],
+            result["Final Value"]
+        ])
 
     mf_returns = pd.DataFrame(mf_rets, columns=["symbol","scheme_category","xirr","cagr","invested","current_amount"])
 

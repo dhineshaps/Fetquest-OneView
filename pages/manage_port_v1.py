@@ -8,6 +8,7 @@ from collections import defaultdict
 from utils import load_user_id
 from navbar import top_navbar
 from utils import load_user_id,load_user_name
+import os
 
 st.set_page_config(page_title="Manage Portfolio", layout="wide")
 
@@ -133,17 +134,40 @@ stock = load_stock_list()
 stock["NAME OF COMPANY"] = stock["NAME OF COMPANY"].str.lower()
 cos_list = stock["NAME OF COMPANY"].tolist()
 
-# mf= pd.read_csv("amfi_mutual_fund_list.csv")
-# fund_list = mf["Scheme Name"].tolist()
+mf= pd.read_csv("amfi_mutual_fund_list.csv")
+fund_list = mf["Scheme Name"].tolist()
 
 # mf_new = pd.read_csv('funds1.csv')
 # column_names_index = mf_new .columns #test
 
-@st.cache_data(show_spinner="Loading mutual fund data...")
-def load_fund_data():
-    return pd.read_csv("funds1.csv", low_memory=False)
+# @st.cache_data(show_spinner="Loading mutual fund data...")
+# def load_fund_data():
+#     return pd.read_csv("funds1.csv", low_memory=False)
 
-mf_new = load_fund_data()
+# mf_new = load_fund_data()
+# column_names_index = mf_new.columns
+csv_file = "funds1.csv"
+parquet_file = "funds1.parquet"
+if (
+    not os.path.exists(parquet_file)
+    or os.path.getmtime(csv_file) > os.path.getmtime(parquet_file)
+):
+    df_mf = pd.read_csv("funds1.csv", low_memory=False)
+    df_mf.to_parquet("funds1.parquet", index=False)
+    print("Parquet file refreshed from updated CSV!")
+
+@st.cache_resource(show_spinner=False)
+def load_mutual_fund_data():
+    try:
+        df = pd.read_parquet("funds1.parquet")
+        df = df.fillna("")
+    except Exception:
+        df = pd.read_csv("funds1.csv", low_memory=False)
+        df = df.fillna("")
+        
+    return df
+
+mf_new = load_mutual_fund_data()
 column_names_index = mf_new.columns
 
 Gold_list= ["22K","24K"]

@@ -42,7 +42,7 @@ def stock_data(stock_list):
         week52Low = round(df["High"].min().item(),2)
         stock_df.append([stock_name,CMP,sector,pe,eps,PB, mcap,mcap_formated,csize,week52High,week52Low])
     df_stock_list = pd.DataFrame(stock_df, columns=["symbol","Current price","Sector","PE","EPS","PB Ratio","Market Cap Num","Market Cap","Company Size","52Week High","52Week Low"])
-    print(df_stock_list)
+    #print(df_stock_list)
     return df_stock_list
      
 

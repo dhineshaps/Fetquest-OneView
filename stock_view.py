@@ -70,6 +70,48 @@ def stock_data_graph(concatenated_df_stock,total_invested_stock,total_current_am
 
         st.plotly_chart(fig_stock_prices, use_container_width=True)
 
+    col1,col2 = st.columns(2)
+    with col1:
+        fig_sector = px.pie(
+        concatenated_df_stock,
+        names="asset",
+        values="Invested Amount",
+        title="Investment Allocation on each Stock",
+        color_discrete_sequence=px.colors.qualitative.Safe
+        )
+        st.plotly_chart(fig_sector, use_container_width=True)
+    with col2:
+        fig_sector = px.pie(
+        concatenated_df_stock,
+        names="asset",
+        values="Current Value",
+        title="Current Value on each Stock",
+        color_discrete_sequence=px.colors.qualitative.Safe
+        )
+        st.plotly_chart(fig_sector, use_container_width=True)
+
+    col1,col2 = st.columns(2)
+
+    with col1:
+        fig_cap = px.pie(
+        concatenated_df_stock,
+        names="Company Size",
+        values="Invested Amount",
+        title="Investment by Company Size",
+        color_discrete_sequence=px.colors.qualitative.Safe
+        )
+        st.plotly_chart(fig_cap, use_container_width=True)
+
+    with col2:
+        fig_cap = px.pie(
+        concatenated_df_stock,
+        names="Company Size",
+        values="Current Value",
+        title="current value by Company Size",
+        color_discrete_sequence=px.colors.qualitative.Safe
+        )
+        st.plotly_chart(fig_cap, use_container_width=True)
+
     col3,col4 = st.columns(2)
     with col3:
         sector_summary = (
@@ -84,6 +126,8 @@ def stock_data_graph(concatenated_df_stock,total_invested_stock,total_current_am
     )
     st.plotly_chart(fig_sector_bar, use_container_width=True)
 
+
+
     # with col4:
     #     fig_bubble = px.scatter(
     #     concatenated_df_stock,
@@ -95,3 +139,8 @@ def stock_data_graph(concatenated_df_stock,total_invested_stock,total_current_am
     #     title="EPS vs Profit Loss Bubble Size = Market Cap"
     # )
     # st.plotly_chart(fig_bubble, use_container_width=True)
+
+
+#2000000000000 - large cap
+#>50000000000 - small
+#50000000000 - 200000000000000 - mid
