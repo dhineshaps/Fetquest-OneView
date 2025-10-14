@@ -14,6 +14,10 @@ from consolidated_view import consolidated_data
 from stock_view import stock_data_graph
 from mf_view import mfdata_graph
 from gold_view import gold_data_graph  
+from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
+from stock_data_table import stock_data_display
+from mf_data_table import mf_data_display
+
 st.set_page_config(page_title="View Portfolio", layout="wide")
 
 # --- Initialize session state ---
@@ -116,6 +120,7 @@ if mf_isin_list:
         #st.write(mf_df)
         mf_df["invested"] = pd.to_numeric(mf_df["invested"], errors="coerce") #converting to numeric from string
         mf_df["current_amount"] = pd.to_numeric(mf_df["current_amount"], errors="coerce") #converting to numeric from string
+        mf_df["Profit/Loss"] =   mf_df["current_amount"] -  mf_df["invested"]
         concatenated_df_mf = pd.merge(
         mf_portfolio, mf_df, on="symbol", how="left"
         ).drop_duplicates(subset=["symbol"])
@@ -123,7 +128,7 @@ if mf_isin_list:
         concatenated_df_mf.index = concatenated_df_mf.index + 1 
         total_invested_mf = concatenated_df_mf["invested"].sum()
         total_current_amount_mf =  concatenated_df_mf["current_amount"].sum()
-    #print(concatenated_df_mf.columns)
+        #print(concatenated_df_mf.columns)
 
    
 if gold_list:
@@ -149,7 +154,10 @@ with tab2:
     if cos_list:
         #print(stock_view_df.columns)
         #print(concatenated_df_stock.columns)
-        st.dataframe(stock_view_df)
+        #st.dataframe(stock_view_df)
+        styled_df_stock = stock_data_display(stock_view_df)
+        #st.write(styled_df)
+        st.dataframe(styled_df_stock, use_container_width=True)
         stock_data_graph(stock_view_df,total_invested_stock,total_current_amount_stock)
     else:
         st.info("Stocks are not in you portfolio")
@@ -160,6 +168,8 @@ with tab3:
     #st.write(mf_transactions)
     #st.write(mf_df)
     st.write(concatenated_df_mf)
+    styled_df_mf = mf_data_display(concatenated_df_mf)
+    st.dataframe(styled_df_mf, use_container_width=True)
     mfdata_graph(concatenated_df_mf,total_invested_mf,total_current_amount_mf)
     #df_fund_sch[(df_fund_sch["symbol"] == 124178)]
 
