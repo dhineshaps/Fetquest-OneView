@@ -6,8 +6,8 @@ import time
 
 st.set_page_config(page_title="Signup")
 
-url="https://anpufhhyswexjgwwddcy.supabase.co"
-key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFucHVmaGh5c3dleGpnd3dkZGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4NzM2ODEsImV4cCI6MjA1OTQ0OTY4MX0.aP4NCS53RezlAsBvAxmzqKUFYtL8azVRbsKnnGCTWmk"
+url = st.secrets["db_url"]
+key = st.secrets["db_key"]
 
 supabase: Client = create_client(url, key)
 
@@ -41,9 +41,6 @@ with st.form("my_form"):
         st.success("Sign up sucessfull, now login with credentials")
         time.sleep(2.4)
         st.switch_page("login.py")
-        #st.success("redirecting")
-
-
 
 
 col1, col2 = st.columns(2)
@@ -54,7 +51,3 @@ with col1:
 
 with col2:
     st.button("Login with Google", type="primary")
-
-# with st.sidebar:
-#     with st.echo():
-#         st.write("this side")

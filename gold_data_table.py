@@ -1,40 +1,36 @@
 import pandas as pd
 import numpy as np
 
-def mf_data_display(mf_view_df):
+def gold_data_display(gold_view_df):
+
     cols_to_keep = [
-        "asset", "current_amount", "average_price", "quantity",
-        "scheme_category", "xirr", "cagr", "invested", "Profit/Loss"
+        "asset", "average_price", "quantity",
+        "Current price"
     ]
 
-    # Keep only existing columns to avoid KeyError
-    cols_to_keep = [c for c in cols_to_keep if c in mf_view_df.columns]
-    df_mf_display = mf_view_df[cols_to_keep].copy()
+    df_Gold_display = gold_view_df[cols_to_keep].copy()
 
-    # Convert numeric columns properly
-    for col in ["current_amount", "invested", "Profit/Loss"]:
-        if col in df_mf_display.columns:
-            df_mf_display[col] = pd.to_numeric(df_mf_display[col], errors="coerce")
+    df_Gold_display["Invested Amount"] = df_Gold_display["quantity"] *df_Gold_display["average_price"]
+    df_Gold_display["Current Value"] = df_Gold_display["quantity"] *df_Gold_display["Current price"]
+    df_Gold_display["Profit/Loss"] =  df_Gold_display["Current Value"] - df_Gold_display["Invested Amount"]
 
-    # Rename for display clarity
-    df_mf_display.rename(columns={
-        "asset": "Fund",
-        "quantity": "Quantity",
-        "average_price": "Average Price",
-        "xirr": "XIRR",
-        "cagr": "CAGR",
-        "current_amount": "Current Value",
-        "scheme_category": "Scheme Category",
-        "invested": "Invested"
+    df_Gold_display.rename(columns={
+    "asset": "Gold Category",
+    "quantity": "Quantity",
+    "average_price": "Average Price",
+    "Current price": "Current Price",
+    "Invested Amount":"Invested",
     }, inplace=True)
 
-    # Formatting rules
+    for col in ["Current Price", "Invested", "Profit/Loss"]:
+        if col in df_Gold_display.columns:
+            df_Gold_display[col] = pd.to_numeric(df_Gold_display[col], errors="coerce")
+
     fmt_dict = {
         "Average Price": "{:.2f}",
         "Quantity": "{:.0f}",
-        "XIRR": "{:.2f}",
-        "CAGR": "{:.2f}",
         "Invested": "{:.2f}",
+        "Current Price": "{:.2f}",
         "Current Value": "{:.2f}",
         "Profit/Loss": "{:.2f}",
     }
@@ -62,12 +58,14 @@ def mf_data_display(mf_view_df):
         except Exception:
             color = "white"
         return f"color: {color}; font-weight: bold"
-
-    styled_df_mf = (
-        df_mf_display.style
+    
+    styled_df_gold = (
+        df_Gold_display.style
         .apply(highlight_row, axis=1)
         .map(color_profit_loss, subset=["Profit/Loss"])
         .format(fmt_dict)
     )
 
-    return styled_df_mf
+    return styled_df_gold
+
+

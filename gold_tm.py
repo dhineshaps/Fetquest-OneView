@@ -7,7 +7,7 @@ gold_data = []
 @st.cache_data
 def get_gold_rates(gold_list):
 
-    url = "https://www.thangamayil.com/scheme/index/rateshistory/"
+    url = st.secrets["tml_link"]
     response = requests.get(url)
     response.raise_for_status()
 

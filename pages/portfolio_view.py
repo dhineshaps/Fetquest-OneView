@@ -17,6 +17,7 @@ from gold_view import gold_data_graph
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 from stock_data_table import stock_data_display
 from mf_data_table import mf_data_display
+from gold_data_table import gold_data_display
 
 st.set_page_config(page_title="View Portfolio", layout="wide")
 
@@ -140,7 +141,7 @@ if gold_list:
         concatenated_df_gold["average_price"] = pd.to_numeric(concatenated_df_gold["average_price"], errors="coerce") #converting to numeric from string
         concatenated_df_gold["Current price"] = pd.to_numeric(concatenated_df_gold["Current price"], errors="coerce") #converting to numeric from string
         concatenated_df_gold.index = concatenated_df_gold.index + 1 
-        print( concatenated_df_gold.columns)
+        #print( concatenated_df_gold.columns)
         total_invested_gold =  concatenated_df_gold["average_price"].sum()
         total_current_amount_gold = concatenated_df_gold["Current price"].sum()
 
@@ -149,14 +150,12 @@ if gold_list:
 tab1, tab2, tab3, tab4 = st.tabs(["Consolidated Portfolio", "Stock", "Mutual Fund","Gold"])
 
 with tab1:
+
     consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold,total_current_amount_stock,total_current_amount_mf,total_current_amount_gold)
+
 with tab2:
     if cos_list:
-        #print(stock_view_df.columns)
-        #print(concatenated_df_stock.columns)
-        #st.dataframe(stock_view_df)
         styled_df_stock = stock_data_display(stock_view_df)
-        #st.write(styled_df)
         st.dataframe(styled_df_stock, use_container_width=True)
         stock_data_graph(stock_view_df,total_invested_stock,total_current_amount_stock)
     else:
@@ -164,20 +163,17 @@ with tab2:
 
 
 with tab3:
-    #st.write(mf_portfolio)
-    #st.write(mf_transactions)
-    #st.write(mf_df)
-    st.write(concatenated_df_mf)
-    styled_df_mf = mf_data_display(concatenated_df_mf)
-    st.dataframe(styled_df_mf, use_container_width=True)
-    mfdata_graph(concatenated_df_mf,total_invested_mf,total_current_amount_mf)
-    #df_fund_sch[(df_fund_sch["symbol"] == 124178)]
+    if mf_isin_list:
+        styled_df_mf = mf_data_display(concatenated_df_mf)
+        st.dataframe(styled_df_mf, use_container_width=True)
+        mfdata_graph(concatenated_df_mf,total_invested_mf,total_current_amount_mf)
+    else:
+         st.info("Mutual Funds are not in you portfolio")
 
 with tab4:
     if gold_list:
-        st.write(concatenated_df_gold)  #possible to remove sysmbol ?
-        st.write(total_invested_gold)
-        st.write(total_current_amount_gold)
+        styled_df_gold = gold_data_display(concatenated_df_gold)
+        st.dataframe(styled_df_gold, use_container_width=True)
         gold_data_graph(concatenated_df_gold,total_invested_gold,total_current_amount_gold)
     else:
         st.info("Gold is not in you portfolio")

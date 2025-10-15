@@ -9,7 +9,6 @@ def top_navbar():
         else:
             if st.button("View Portfolio"):   
                 st.session_state.current_page = "View Portfolio"
-                #st.switch_page("pages/1_View_Portfolio.py")
                 st.switch_page("pages/portfolio_view.py")
 
     with middle_col:
@@ -18,11 +17,9 @@ def top_navbar():
         else:
             if st.button("Manage Portfolio"): 
                 st.session_state.current_page = "Manage Portfolio"
-                #st.switch_page("pages/2_Manage_Portfolio.py")
-                st.switch_page("pages/manage_port_v1.py")
+                st.switch_page("pages/manage_portfolio.py")
 
     with right_col:
         if st.button("Logout"):
             st.session_state.clear()
-            #st.switch_page("login_new.py")
             st.switch_page("login.py")
