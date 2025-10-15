@@ -131,7 +131,7 @@ def load_stock_list():
 
 # stock = pd.read_csv("nse_equity.csv")
 stock = load_stock_list()
-stock["NAME OF COMPANY"] = stock["NAME OF COMPANY"].str.lower()
+stock["NAME OF COMPANY"] = stock["NAME OF COMPANY"]   #.str.lower()
 cos_list = stock["NAME OF COMPANY"].tolist()
 
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
@@ -201,9 +201,12 @@ with tab1:
 
         with col2:
             if asset_type == "Stock":
+                #search = st.text_input("Search Stock", key=f"search_stock_{row}")
+                # = [c for c in cos_list if search.lower() in c.lower()] if search else cos_list
                 st.selectbox(
                     "Stock",
                     cos_list,
+                    #filtered_cos,
                     index=None,
                     key=f"stock_{row}",
                 )
@@ -350,7 +353,7 @@ with tab1:
                     print(fund)
                     try:
                         dat = get_mf_data(user_id,fund)
-                        print(dat)
+                        #print(dat)
                     except APIError as e:
                         error_data = e.args[0]
                    
@@ -367,13 +370,13 @@ with tab1:
                                 st.stop()
 
                         else:
-                            print("HERE")
+                            #print("HERE")
                             old_qty = dat.data[0].get("quantity")
                             new_qty = units + old_qty
-                            print(new_qty)
+                            #print(new_qty)
                             old_price = dat.data[0].get("average_price")
                             new_price = float(old_price+amount)
-                            print(new_price)
+                            #print(new_price)
                             try:
                                     update_mf_holdings = update_portfolio(new_qty,new_price,fund,user_id)
                             except APIError as e:

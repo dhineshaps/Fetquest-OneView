@@ -95,7 +95,7 @@ def stock_data_graph(concatenated_df_stock, total_invested_stock, total_current_
         title="Average vs Current Price by Stock",
         color_discrete_map={
             "Average Price": "#1f77b4",  # Blue
-            "Current Price": "#2ca02c"   # Green
+            "Current Price": "#D6C41E"   # Green
         }
     )
     fig_stock_prices.update_layout(

@@ -48,7 +48,7 @@ st.session_state.current_page = "View Portfolio"  # update this for each page
 top_navbar()
 
 st.title("FETQuest OneView - Portfolio")
-
+cos_list,mf_isin_list,gold_list = [],[],[]
 user_id = st.session_state.u_id
 #st.write(user_id)
 user_name = st.session_state.u_name
@@ -59,6 +59,7 @@ total_invested_gold = 0.0
 total_current_amount_stock = 0.0
 total_current_amount_mf = 0.0
 total_current_amount_gold = 0.0
+
 
 def show_holdings(user_id):
     df = load_portfolio(user_id).reset_index(drop=True)
@@ -80,15 +81,17 @@ portfolio_curd = show_holdings(user_id)
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
 
 if portfolio_curd.empty:
-    st.info("Your Portfolio is Empty Navigate to Manage Portfolio to add.")
+    st.info("Welcome, Your Portfolio is Empty Navigate to Manage Portfolio to add.")
 
 # st.write(portfolio_curd)
-stock_portfolio =  portfolio_curd[portfolio_curd["type"] == "Stock"]
-cos_list = stock_portfolio['symbol'].tolist()
-mf_portfolio = portfolio_curd[portfolio_curd["type"] == "Mutual Fund"]
-mf_isin_list = mf_portfolio['symbol'].tolist()
-gold_portfolio = portfolio_curd[portfolio_curd["type"] == "Gold"]
-gold_list = gold_portfolio['asset'].tolist()
+if not portfolio_curd.empty:
+    stock_portfolio =  portfolio_curd[portfolio_curd["type"] == "Stock"]
+    cos_list = stock_portfolio['symbol'].tolist()
+    mf_portfolio = portfolio_curd[portfolio_curd["type"] == "Mutual Fund"]
+    mf_isin_list = mf_portfolio['symbol'].tolist()
+    gold_portfolio = portfolio_curd[portfolio_curd["type"] == "Gold"]
+    gold_list = gold_portfolio['asset'].tolist()
+
 
 mf_transactions = show_mf_transactions(user_id)
 
@@ -114,7 +117,6 @@ if cos_list:
         total_current_amount_stock = concatenated_df_stock["Current Value"].sum()
         #print(concatenated_df_stock.columns)
 
-
 if mf_isin_list:
     with st.spinner("Calculating XIRR and CAGR for your funds..."):
         mf_df = mf_data(mf_isin_list)
@@ -131,7 +133,7 @@ if mf_isin_list:
         total_current_amount_mf =  concatenated_df_mf["current_amount"].sum()
         #print(concatenated_df_mf.columns)
 
-   
+
 if gold_list:
     with st.spinner("Calculating Gold Data..."):
         gold_df = get_gold_rates(gold_list)
@@ -150,9 +152,11 @@ if gold_list:
 tab1, tab2, tab3, tab4 = st.tabs(["Consolidated Portfolio", "Stock", "Mutual Fund","Gold"])
 
 with tab1:
-
-    consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold,total_current_amount_stock,total_current_amount_mf,total_current_amount_gold)
-
+   
+     if cos_list or mf_isin_list or gold_list:
+        consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold,total_current_amount_stock,total_current_amount_mf,total_current_amount_gold)
+     else:
+        st.info("Build and Visualize your portfolio")
 with tab2:
     if cos_list:
         styled_df_stock = stock_data_display(stock_view_df)

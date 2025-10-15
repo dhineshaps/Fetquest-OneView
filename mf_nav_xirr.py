@@ -224,13 +224,13 @@ def mf_data(mf_list):
             print(f"Failed to get NAV for {i}: {e}")
             scheme_category = "NA"
             nav_val = 0.0
-        print("here in creating nav for ",i)
-        print(nav_val)
-        print(scheme_category)
-        print("here is creating nav")
+        #print("here in creating nav for ",i)
+        #print(nav_val)
+        #print(scheme_category)
+        #print("here is creating nav")
         result = calculate_xirr_cagr_for_fund(mf_df, current_nav=nav_val)
-        print(f"Symbol {i} → XIRR: {result['XIRR']:.2%}, CAGR: {result['CAGR']:.2%}, "
-              f"Invested: {result['Total Invested']:.0f}, Final Value: {result['Final Value']:.0f}")
+        # print(f"Symbol {i} → XIRR: {result['XIRR']:.2%}, CAGR: {result['CAGR']:.2%}, "
+        #       f"Invested: {result['Total Invested']:.0f}, Final Value: {result['Final Value']:.0f}")
         symbol=i
         # xirr = f"{result['XIRR']:.2%}"
         # CAGR= f"{result['CAGR']:.2%}"
