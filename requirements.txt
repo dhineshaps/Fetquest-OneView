@@ -9,3 +9,4 @@ streamlit-aggrid
 streamlit-navigation-bar
 numpy_financial
 plotly
+Authlib

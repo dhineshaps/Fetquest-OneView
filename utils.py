@@ -30,8 +30,15 @@ def load_user_name() -> str | None:
     """Load user ID from cookie (if available)."""
     return cookies.get("u_name")
 
+# def clear_user_id():
+#     """Remove user ID (logout)."""
+#     if "u_id" in cookies:
+#         del cookies["u_id"]
+#         cookies.save()
+
 def clear_user_id():
-    """Remove user ID (logout)."""
-    if "u_id" in cookies:
-        del cookies["u_id"]
-        cookies.save()
+    """Remove user cookies (logout)."""
+    for key in ["u_id", "u_name"]:
+        if key in cookies:
+            del cookies[key]
+    cookies.save()

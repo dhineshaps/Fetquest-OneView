@@ -9,7 +9,7 @@ from utils import load_user_id
 from navbar import top_navbar
 from utils import load_user_id,load_user_name
 import os
-
+import time
 st.set_page_config(page_title="Manage Portfolio", layout="wide")
 
 # --- Initialize session state ---
@@ -96,10 +96,11 @@ if not portfolio_dashboard.empty:
     portfolio_dashboard = portfolio_dashboard.drop("symbol", axis=1)
     portfolio_dashboard.columns = portfolio_dashboard.columns.str.capitalize()
     portfolio_dashboard ["Asset"] = portfolio_dashboard ["Asset"].str.upper()
-    with st.expander("View your holdings"):
-        st.dataframe(portfolio_dashboard , use_container_width=True)
-else:
-    st.write("Portfolio is Empty")
+#     with st.expander("View your holdings"):
+#         st.dataframe(portfolio_dashboard , use_container_width=True)
+# else:
+#     with st.expander("View your holdings"):
+#         st.write("Portfolio is Empty")
 
 #----------------------------------------------------------------------------#
 
@@ -117,10 +118,11 @@ if not mf_transactions.empty:
     mf_transactions["Date"] = mf_transactions["Transaction Date"].dt.date
     mf_transactions["Time"] = mf_transactions["Transaction Date"].dt.time
     mf_transactions =  mf_transactions.drop("Transaction Date",axis=1)
-    with st.expander("View your MF transactions"):
-        st.dataframe(mf_transactions , use_container_width=True)
-else:
-    st.write("No Mutual Fund Transactions Recorded")
+#     with st.expander("View your MF transactions"):
+#         st.dataframe(mf_transactions , use_container_width=True)
+# else:
+#     with st.expander("View your MF transactions"):
+#         st.write("No Mutual Fund Transactions Recorded")
 
 
 # ---------------- ADD HOLDING ----------------
@@ -248,8 +250,7 @@ with tab1:
                 pass
 
         with col5:
-            st.button("🗑️", key=f"del_{row}", on_click=remove_row, args=[row])
-
+            st.button("❌", key=f"del_{row}", on_click=remove_row, args=[row]) #🗑️
 
         company_name = st.session_state.get(f"stock_{row}")
         if company_name:
@@ -308,8 +309,8 @@ with tab1:
     col_i1, col_i2 = st.columns([1,1])
     with col_i1:
         if st.button("Submit", type="primary"):
-            st.write(rows_data)
-            print(rows_data)
+            #st.write(rows_data)
+            #print(rows_data)
 
             invalid_rows = []
             for row in st.session_state["rows"]:
@@ -344,9 +345,9 @@ with tab1:
 
                     mf_bulk_insert.append(row)
 
-            print("*************Here****************")        
-            print(stocks_gold)
-            print("*************Here****************")
+            # print("*************Here****************")        
+            # print(stocks_gold)
+            # print("*************Here****************")
             if  mf_txns:
                 for i in mf_txns:
                     user_id, type, fund,fund_isin,txn_date, txn_type, amout,nav, units = i
@@ -362,8 +363,8 @@ with tab1:
                             try:
                                 ##insert
                                 response =  insert_mf_holdings(user_id,type,units,amout,fund,fund_isin) ##insert
-                                print(response)
-                                st.write("Success")
+                                #print(response)
+                                #st.write("Success")
                             except APIError as e:
                                 error_data = e.args[0]
                                 st.write("Failed to Add Transaction, Please try again")
@@ -421,9 +422,10 @@ with tab1:
                                     st.write(error_data)
                                     st.stop()
                 try:
-                    print(" Here in the bulk insert")
+                    #print(" Here in the bulk insert")
                     res = insert_mf_transactions(mf_bulk_insert)
                     st.session_state["insert_success_mutual_fund"] = True
+                    st.rerun()
                 except APIError as e:
                     error_data = e.args[0]
                     st.write("Failed to Add Transaction, Please try again")
@@ -433,10 +435,10 @@ with tab1:
             if stocks_gold:
                 try:
                         res = insert_portfolio1(stocks_gold)
-                        st.write(res)
+                        #st.write(res)
                         st.session_state["insert_success_Stocks"] = True
                         st.session_state["rows"] = []
-                        st.rerun()
+                        #st.rerun()
                 except APIError as e:
                     error_data = e.args[0]  # APIError contains the dict you pasted
                     st.write(f"This asset {error_data.split(",")[3].split("=")[1].split("(")[1].split(")")[0]} already exists in your portfolio. Try updating instead")
@@ -447,9 +449,12 @@ with tab1:
 
 
         if st.session_state.get("insert_success_Stocks") or st.session_state.get("insert_success_mutual_fund") :
+            st.success(f"Asset added to Portfolio")
+            time.sleep(1)
             st.toast("✅ Holdings added!", icon="🎉")
             st.session_state["insert_success_Stocks"] = False
-            st.session_state["insert_success_mutual_fund"] = False    
+            st.session_state["insert_success_mutual_fund"] = False 
+            st.rerun()   
 
     with col_i2:
         if st.button("Cancel", type="primary"):
@@ -519,9 +524,10 @@ with tab2:
                 with col_u1:
                     if st.button("✅ Update Holding", key="update_button"):
                         if (qty_new != qty) or (avg_price_new != avg_price):
-                            st.info("Proceeding update")
+                            #st.info("Proceeding update")
                             res = update_portfolio(qty_new, avg_price_new, asset,user_id)
-                            st.success("Portfolio updated")
+                            st.success(f"{asset} Updated in Portfolio")
+                            time.sleep(1) 
                             st.toast("✅ Holdings Updated!", icon="🎉")
                             reset_update_state()
                             st.rerun()
@@ -646,7 +652,9 @@ with tab3:
                     except APIError as e:
                         st.write(e)
                         st.stop()
-                    st.success("Portfolio Deleted")
+                    st.success(f"{asset.strip()} Deleted from Portfolio")
+                    time.sleep(1) 
+                    st.toast("🎉 Holdings Updated!", icon="🎉")
                     reset_delete_state()
                     st.rerun()
                 if option_asset1 in ["Mutual Fund"] and asset:   # have to handle logic to delete from mf transactions , need to pass user id
@@ -660,8 +668,9 @@ with tab3:
                         except APIError as e:
                             st.write(e)
                             st.stop()
-                        st.success("Portfolio Deleted")
-                        reset_delete_state()
+                        st.success(f"{asset.strip()} Deleted from Portfolio")
+                        time.sleep(1) 
+                        st.toast("🎉 Holdings Updated!", icon="🎉")
                         st.rerun()
 
 
@@ -749,8 +758,9 @@ with tab3:
                             st.write(e)
                             st.stop()
 
-
-                        st.success("Transaction Deleted")
+                        st.success(f"{asset.strip()} Transaction Deleted from Portfolio")
+                        time.sleep(1)
+                        st.toast("🎉 Holdings Updated!", icon="🎉")
                         reset_delete_state()
                         st.rerun()
 
@@ -761,5 +771,25 @@ with tab3:
             if st.button("❌ Cancel Delete", key="cancel_delete_button"):
                 reset_delete_state()
                 st.rerun()
- 
-  
+
+st.markdown("----")
+if not portfolio_dashboard.empty:
+    portfolio_dashboard_re = portfolio_dashboard.rename(columns={'Average_price': 'Average Price'})
+    with st.expander("View your Asset holdings 💰"):
+        st.dataframe(portfolio_dashboard_re , use_container_width=True)
+else:
+    with st.expander("View your holdings  💰"):
+        st.write("Portfolio is Empty")
+
+
+if not mf_transactions.empty:
+    #mf_transactions_re = mf_transactions.rename(columns={'UNITS': 'Units'})
+    mf_transactions_re = mf_transactions.drop('Symbol', axis=1)
+    col_order =  ['Transaction Id','Mutual Fund Scheme', 'Transaction Type','Invested','NAV','UNITS','Date','Time']
+    mf_transactions_re = mf_transactions_re[col_order]
+    mf_transactions_re = mf_transactions_re.rename(columns={'UNITS': 'Units'})
+    with st.expander("View your MF transactions 📒"):
+        st.dataframe(mf_transactions_re , use_container_width=True)
+else:
+    with st.expander("View your MF transactions 📒"):
+        st.write("No Mutual Fund Transactions Recorded")

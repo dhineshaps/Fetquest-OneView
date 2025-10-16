@@ -48,9 +48,11 @@ st.session_state.current_page = "View Portfolio"  # update this for each page
 top_navbar()
 
 st.title("FETQuest OneView - Portfolio")
-cos_list,mf_isin_list,gold_list = [],[],[]
+
+# cos_list,mf_isin_list,gold_list = [],[],[]
+
 user_id = st.session_state.u_id
-#st.write(user_id)
+# st.write(user_id)
 user_name = st.session_state.u_name
 st.write(f"👋 Hi, {user_name}!")
 total_invested_stock = 0.0
@@ -96,30 +98,33 @@ if not portfolio_curd.empty:
 mf_transactions = show_mf_transactions(user_id)
 
 if cos_list:
-    with st.spinner("Fetching Stock Details..."):
-        stock_df = stock_data(cos_list)
-        #print("in portfolio view")
-        #print(stock_df)
-        concatenated_df_stock = pd.merge(
-        stock_portfolio, stock_df, on="symbol", how="left"
-        ).drop_duplicates(subset=["symbol"])
-        #stock_view_df = concatenated_df_stock.copy() #created copy as market cap data getting null  value
-        concatenated_df_stock["Invested Amount"] = concatenated_df_stock["quantity"] *concatenated_df_stock["average_price"]
-        concatenated_df_stock["Current Value"] = concatenated_df_stock["quantity"] *concatenated_df_stock["Current price"]
-        concatenated_df_stock["Profit/Loss"] =  concatenated_df_stock["Current Value"] - concatenated_df_stock["Invested Amount"]
-        stock_view_df = concatenated_df_stock.copy()
-        numeric_cols = ["EPS", "Profit/Loss", "Market Cap"]
-        for col in numeric_cols:
-            concatenated_df_stock[col] = pd.to_numeric(concatenated_df_stock[col], errors="coerce")
-        concatenated_df_stock.index = concatenated_df_stock.index + 1 
-        #st.write(concatenated_df_stock)
-        total_invested_stock = concatenated_df_stock["Invested Amount"].sum()
-        total_current_amount_stock = concatenated_df_stock["Current Value"].sum()
+    #with st.spinner("Fetching Stock Details..."):
+    stock_df = stock_data(cos_list)
+    #print("in portfolio view")
+    #print(stock_df)
+    concatenated_df_stock = pd.merge(
+    stock_portfolio, stock_df, on="symbol", how="left"
+    ).drop_duplicates(subset=["symbol"])
+    #stock_view_df = concatenated_df_stock.copy() #created copy as market cap data getting null  value
+    concatenated_df_stock["Invested Amount"] = concatenated_df_stock["quantity"] *concatenated_df_stock["average_price"]
+    concatenated_df_stock["Current Value"] = concatenated_df_stock["quantity"] *concatenated_df_stock["Current price"]
+    concatenated_df_stock["Profit/Loss"] =  concatenated_df_stock["Current Value"] - concatenated_df_stock["Invested Amount"]
+    stock_view_df = concatenated_df_stock.copy()
+    numeric_cols = ["EPS", "Profit/Loss", "Market Cap"]
+    for col in numeric_cols:
+        concatenated_df_stock[col] = pd.to_numeric(concatenated_df_stock[col], errors="coerce")
+    concatenated_df_stock.index = concatenated_df_stock.index + 1 
+    #st.write(concatenated_df_stock)
+    total_invested_stock = concatenated_df_stock["Invested Amount"].sum()
+    total_current_amount_stock = concatenated_df_stock["Current Value"].sum()
         #print(concatenated_df_stock.columns)
 
 if mf_isin_list:
     with st.spinner("Calculating XIRR and CAGR for your funds..."):
-        mf_df = mf_data(mf_isin_list)
+        print("**************** here mf list********************")
+        print(mf_isin_list)
+        mf_df = mf_data(mf_isin_list,mf_transactions)
+        print("**************** here mf list********************")
         #st.write(mf_df)
         mf_df["invested"] = pd.to_numeric(mf_df["invested"], errors="coerce") #converting to numeric from string
         mf_df["current_amount"] = pd.to_numeric(mf_df["current_amount"], errors="coerce") #converting to numeric from string

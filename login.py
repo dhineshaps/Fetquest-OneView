@@ -31,7 +31,7 @@ def login_form():
         submitted = st.form_submit_button("Submit")
         if submitted:
             if not user_name.strip() or not password.strip():
-                st.warning("Enter the Creds to Continue")
+                st.warning("Enter the Credentials to Continue")
             else:
                 try:     
                     ret_pwd = (
@@ -63,8 +63,9 @@ def login_form():
                         st.session_state.logged_in=True
                         st.session_state.u_id = u_id
                         st.session_state.u_name = u_name
-                        st.write(st.session_state.u_id)
-                        st.write(st.session_state.u_name)
+                        st.session_state["login_method"] = "manual"
+                        # st.write(st.session_state.u_id)
+                        # st.write(st.session_state.u_name)
                         #save_user_id(str(u_id))
                         save_user_cookies(u_id, u_name)
                         #st.rerun()
@@ -79,9 +80,46 @@ def login_form():
             st.switch_page("pages/signup.py")
 
     with col2:
-        st.button("Login with Google", type="primary")
-    
+     #if not st.user.is_logged_in:
+    #  if hasattr(st, "user") and getattr(st.user, "is_logged_in", False):
+     if st.button("Log in with Google", type="primary"):
+            st.login()
+     st.stop()
+
+     if st.user.is_logged_in:
+        guser_name = st.user.name.strip()
+        guser_email = st.user.email.strip().lower()
+
+        try:
+            ret_user = supabase.table("fet_portfolio_users").select("user_id","username").eq("email", guser_email).execute()
+        except APIError as e:
+            st.error(f"Database error: {e}")
+            st.stop()
+
+        if not ret_user.data:
+            try:
+                supabase.table("fet_portfolio_users").insert({
+                    "username": guser_name,
+                    "password_hash": "GOOGLE_SSO",
+                    "email": guser_email
+                }).execute()
+            except APIError as e:
+                st.error(f"Error inserting user: {e}")
+                st.stop()
+
+            ret_user = supabase.table("fet_portfolio_users").select("user_id","username").eq("email", guser_email).execute()
+
+        user_data = ret_user.data[0]
+        st.session_state.logged_in = True
+        st.session_state.u_id = user_data["user_id"]
+        st.session_state.u_name = user_data["username"]
+        st.session_state["login_method"] = "google"
+        save_user_cookies(user_data["user_id"], user_data["username"])
+        st.success(f"Logged in as {user_data['username']}")
+        st.switch_page("pages/portfolio_view.py")
+            
 def logout():
+    st.logout()
     st.session_state.clear()  # clears all session values
     st.rerun()
 

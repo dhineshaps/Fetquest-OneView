@@ -51,7 +51,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             col3.metric("📈 P/L", f"₹{profit_loss_Sep:,.0f}")
 
         
-        if total_invested_gold is None or total_invested_gold == 0:
+        if (total_invested_gold is None or total_invested_gold == 0) and total_current_amount_gold != 0:
             st.info("⚠️ Gold profit/loss is not included due to missing invested amount.")
 
         alloc_data = [
