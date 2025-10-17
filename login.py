@@ -17,16 +17,43 @@ supabase: Client = create_client(url, key)
 
 st.set_page_config(page_title="Login")
 
+st.markdown("<h1 style='text-align: center; color: #DAA520;font-size: 35px'>The FET Quest - OneView</h1>", unsafe_allow_html=True)
 
+footer = """
+<style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: Black;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        font-size: 16px;
+        z-index: 9999;
+        border-top: 1px solid #ccc;
+    }
+    .stApp {
+        padding-bottom: 60px;
+    }
+</style>
+<div class="footer">
+    Developed with ❤️ by <strong>The FET Quest</strong>
+</div>
+"""
+st.markdown(footer, unsafe_allow_html=True)
+
+
+                
 def login_form():
     def check_password(password: str, hashed: str) -> bool:
         return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
     with st.form("my_form"):
-        st.write("Login Form")
-        user_email = st.text_input("Enter the Email").lower()
+        user_email = st.text_input("Email").lower()
         password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("Submit")
+        submitted = st.form_submit_button("Login")
         if submitted:
 
             valid_email = re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', user_email)
@@ -49,7 +76,7 @@ def login_form():
                 if not ret_pwd.data:
                     st.write("user is not registered")
                 else:
-                    st.write("user is registered")
+                    #write("user is registered")
                     pwd_val = ret_pwd.data[0]['password_hash']
                     val = check_password(password, pwd_val)
                     if val:
@@ -144,7 +171,8 @@ def main():
             st.experimental_rerun()
         st.write("You are logged in. Navigate to Profile or Dashboard.")
     else:
-        st.title("🔐 Login Page")
+        #st.title("🔐🔐 Login Page")
+        st.markdown("<h1 style='text-align: left; color: #87CEEB;font-size: 25px'>🔐 Login to view your Portfolio</h1>", unsafe_allow_html=True)
         # print("here")
         login_form()
 

@@ -35,7 +35,8 @@ if not st.session_state.logged_in:
     st.error("Please login first!")
     st.stop()
 
-st.title("FETQuest OneView – Manage Portfolio")
+#st.title("FETQuest OneView – Manage Portfolio")
+st.markdown("<h1 style='text-align: center; color: #FFA500;font-size: 30px'>FETQuest OneView - Manage Portfolio</h1>", unsafe_allow_html=True)
 #st.write(f"Welcome! Your User ID: {st.session_state.u_id}")
 
 st.session_state.current_page = "Manage Portfolio"
@@ -45,7 +46,7 @@ top_navbar()
 user_id = st.session_state.u_id
 #st.write(user_id)
 user_name = st.session_state.u_name
-st.write(f"👋 Hi, {user_name}!")
+st.markdown(f"<h3 style='color:#296E3E;font-size: 20px'>👋 Welcome, <b>{user_name}</b>!</h3>", unsafe_allow_html=True)
 ######################################## The Above to hanlde the session state ###############################
 #st.title("FETQuest OneView – Manage Portfolio")
 
@@ -63,6 +64,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 # portfolio_curd = pd.DataFrame([
 #         {"Asset": "Stock", "Name": "TCS.NS", "Qty": 5, "Avg Price": 3200},

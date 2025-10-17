@@ -45,16 +45,20 @@ if not st.session_state.logged_in:
 
 st.session_state.current_page = "View Portfolio"  # update this for each page
 
+st.markdown("<h1 style='text-align: center; color: #FFA500;font-size: 30px'>FETQuest OneView - Portfolio</h1>", unsafe_allow_html=True)
+
 top_navbar()
 
-st.title("FETQuest OneView - Portfolio")
+#st.title("FETQuest OneView - Portfolio")
+
 
 # cos_list,mf_isin_list,gold_list = [],[],[]
 
 user_id = st.session_state.u_id
 # st.write(user_id)
 user_name = st.session_state.u_name
-st.write(f"👋 Hi, {user_name}!")
+# st.write(f"👋 Welcome, {user_name}!")
+st.markdown(f"<h3 style='color:#296E3E;font-size: 20px'>👋 Welcome, <b>{user_name}</b>!</h3>", unsafe_allow_html=True)
 total_invested_stock = 0.0
 total_invested_mf = 0.0
 total_invested_gold = 0.0
