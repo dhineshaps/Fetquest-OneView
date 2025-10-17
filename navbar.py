@@ -26,6 +26,8 @@ def top_navbar():
             if st.session_state.get("login_method") == "google":
                 try:
                     st.logout()
+                    st.session_state.clear()
+                    st.stop()
                 except Exception:
                     pass
             st.session_state.clear()
