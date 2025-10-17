@@ -3,8 +3,8 @@ import numpy as np
 
 def mf_data_display(mf_view_df):
     cols_to_keep = [
-        "asset", "current_amount", "average_price", "quantity",
-        "scheme_category", "xirr", "cagr", "invested", "Profit/Loss"
+        "asset", "average_price", "quantity",
+        "scheme_category", "xirr", "cagr", "invested", "current_amount","Profit/Loss","P/L %"
     ]
 
     # Keep only existing columns to avoid KeyError
@@ -23,9 +23,9 @@ def mf_data_display(mf_view_df):
         "average_price": "Average Price",
         "xirr": "XIRR",
         "cagr": "CAGR",
-        "current_amount": "Current Value",
+        "current_amount": "Total Current Value",
         "scheme_category": "Scheme Category",
-        "invested": "Invested"
+        "invested": "Total Invested"
     }, inplace=True)
 
     # Formatting rules
@@ -34,15 +34,16 @@ def mf_data_display(mf_view_df):
         "Quantity": "{:.0f}",
         "XIRR": "{:.2f}",
         "CAGR": "{:.2f}",
-        "Invested": "{:.2f}",
-        "Current Value": "{:.2f}",
+        "Total Invested": "{:.2f}",
+        "Total Current Value": "{:.2f}",
         "Profit/Loss": "{:.2f}",
+        "P/L %": "{:.2f}",
     }
 
     def highlight_row(row):
         """Subtle row background for gain/loss"""
-        invested = row.get("Invested", np.nan)
-        current = row.get("Current Value", np.nan)
+        invested = row.get("Total Invested", np.nan)
+        current = row.get("Total Current Value", np.nan)
 
         if pd.notna(current) and pd.notna(invested):
             if float(current) > float(invested):

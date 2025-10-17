@@ -5,17 +5,15 @@ import bcrypt
 from postgrest.exceptions import APIError
 import time
 from utils import save_user_id, save_user_cookies
+import re
 
 
 url = st.secrets["db_url"]
 key = st.secrets["db_key"]
+guser_cred = st.secrets["guser_pwd"]
 
 supabase: Client = create_client(url, key)
 
-#
-#https://stackoverflow.com/questions/78624469/simplest-way-to-hide-a-page-from-streamlit-sidebar
-# Important: page title must match sidebar label
-#hide_pages(["Signup"])
 
 st.set_page_config(page_title="Login")
 
@@ -26,17 +24,24 @@ def login_form():
 
     with st.form("my_form"):
         st.write("Login Form")
-        user_name = st.text_input("Enter the Email")
+        user_email = st.text_input("Enter the Email").lower()
         password = st.text_input("Password", type="password")
         submitted = st.form_submit_button("Submit")
         if submitted:
-            if not user_name.strip() or not password.strip():
+
+            valid_email = re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', user_email)
+
+            if not valid_email:
+                st.error("Please Provide valid email address")
+                st.stop()
+
+            if not user_email.strip() or not password.strip():
                 st.warning("Enter the Credentials to Continue")
             else:
                 try:     
                     ret_pwd = (
                         supabase.table("fet_portfolio_users")
-                        .select("password_hash").eq("email", user_name).execute()
+                        .select("password_hash").eq("email", user_email).execute()
                     )
                 except:
                     print("error in connecting")
@@ -52,13 +57,13 @@ def login_form():
                         try:     
                             user_id = (
                                 supabase.table("fet_portfolio_users")
-                                .select("user_id","username").eq("email", user_name).execute()
+                                .select("user_id","username").eq("email", user_email).execute()
                             )
                         except APIError as e:
                             st.error("Error in fetching the data, Retry after sometime")
                             
                         u_id = user_id.data[0]['user_id']
-                        print(user_id)
+                        #print(user_id)
                         u_name = user_id.data[0]['username']
                         st.session_state.logged_in=True
                         st.session_state.u_id = u_id
@@ -100,7 +105,7 @@ def login_form():
             try:
                 supabase.table("fet_portfolio_users").insert({
                     "username": guser_name,
-                    "password_hash": "GOOGLE_SSO",
+                    "password_hash": guser_cred,
                     "email": guser_email
                 }).execute()
             except APIError as e:
@@ -140,7 +145,7 @@ def main():
         st.write("You are logged in. Navigate to Profile or Dashboard.")
     else:
         st.title("🔐 Login Page")
-        print("here")
+        # print("here")
         login_form()
 
 if __name__ == "__main__":

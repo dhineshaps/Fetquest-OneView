@@ -16,17 +16,6 @@ average_price INT NOT NULL
 
 
 
--- create table public.fet_portfolio_holdings (
---   id bigint not null,
---   type character varying(50) not null,
---   quantity integer not null,
---   average_price double precision not null,
---   asset character varying PRIMARY KEY not null,
---   symbol character varying(50) not null
--- ) TABLESPACE pg_default;
-
-
-
 create table public.fet_portfolio_holdings (
     id bigserial primary key,
     user_id int not null,

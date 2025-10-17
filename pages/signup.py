@@ -3,6 +3,7 @@ import bcrypt
 from supabase import create_client, Client
 from postgrest.exceptions import APIError
 import time
+import re
 
 st.set_page_config(page_title="Signup")
 
@@ -19,12 +20,19 @@ def hash_password(password: str) -> str:
 with st.form("my_form"):
     st.write("Sign up")
     user_name = st.text_input("Enter the User Name")
-    Email = st.text_input("Enter the Email")
+    Email = st.text_input("Enter the Email").lower()
     password = st.text_input("Password", type="password")
     re_password = st.text_input("Re Enter the Password", type="password")
     submitted = st.form_submit_button("Submit")
 
     if submitted:
+
+        valid_email = re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', Email)
+
+        if not valid_email:
+            st.error("Please Provide valid email address")
+            st.stop()
+            
         if(password != re_password):
             st.error("Password Didn't Match")
         hash_pwd =  hash_password(password )

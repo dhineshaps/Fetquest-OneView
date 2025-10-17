@@ -8,15 +8,16 @@ def stock_data_graph(concatenated_df_stock, total_invested_stock, total_current_
     profit_loss = total_current_amount_stock - total_invested_stock
     pl_percent = (profit_loss / total_invested_stock) * 100 if total_invested_stock > 0 else 0
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3,col4 = st.columns(4)
     col1.metric("💰 Total Invested in Stocks", f"₹{total_invested_stock:,.0f}")
-    col2.metric("📈 Current Value", f"₹{total_current_amount_stock:,.0f}")
+    col2.metric("📈 Total Current Value", f"₹{total_current_amount_stock:,.0f}")
     col3.metric(
         "P/L",
         f"₹{profit_loss:,.0f}",
         f"{pl_percent:.2f}%",
         delta_color="normal"
     )
+    col4.metric("P/L %", f"₹{pl_percent:,.0f}")
 
     st.markdown("---")
 
@@ -29,7 +30,7 @@ def stock_data_graph(concatenated_df_stock, total_invested_stock, total_current_
                 concatenated_df_stock,
                 names="Sector",
                 values="Invested Amount",
-                title="Portfolio Allocation by Sector - Invested",
+                title="Portfolio Allocation by Sector - Total Invested",
                 color_discrete_sequence=px.colors.qualitative.Vivid
             )
             fig_sector.update_traces(textinfo="percent+label")
@@ -41,7 +42,7 @@ def stock_data_graph(concatenated_df_stock, total_invested_stock, total_current_
                 concatenated_df_stock,
                 names="Sector",
                 values="Current Value",
-                title="Portfolio Allocation by Sector - Current Value",
+                title="Portfolio Allocation by Sector -Total Current Value",
                 color_discrete_sequence=px.colors.qualitative.Vivid
             )
             fig_sector.update_traces(textinfo="percent+label")
@@ -83,7 +84,7 @@ def stock_data_graph(concatenated_df_stock, total_invested_stock, total_current_
 
     price_compare_df["Price Type"] = price_compare_df["Price Type"].replace({
         "average_price": "Average Price",
-        "Current price": "Current Price"
+        "Current price": "Current Market Price"
     })
 
     fig_stock_prices = px.bar(
@@ -92,10 +93,10 @@ def stock_data_graph(concatenated_df_stock, total_invested_stock, total_current_
         y="Price",
         color="Price Type",
         barmode="group",
-        title="Average vs Current Price by Stock",
+        title="Average vs Current Market Price by Stock",
         color_discrete_map={
             "Average Price": "#1f77b4",  # Blue
-            "Current Price": "#D6C41E"   # Green
+            "Current Market Price": "#D6C41E"   # Green
         }
     )
     fig_stock_prices.update_layout(

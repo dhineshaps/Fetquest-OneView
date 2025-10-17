@@ -4,7 +4,8 @@
 def stock_data_display(stock_view_df):
     cols_to_keep = [
     "asset", "Current price","average_price","quantity", 
-    "PE", "EPS", "PB Ratio", "Market Cap","Company Size","Sector","52Week High","52Week Low","Invested Amount","Current Value","Profit/Loss"
+    "PE", "EPS", "PB Ratio", "Market Cap","Company Size","Sector","52Week High","52Week Low","Invested Amount","Current Value","Profit/Loss",
+    "P/L %"
      ]
     
     df_Stock_display = stock_view_df[cols_to_keep].copy()
@@ -14,31 +15,33 @@ def stock_data_display(stock_view_df):
     df_Stock_display.rename(columns={
     "asset": "Stock",
     "quantity": "Quantity",
-    "average_price": "Average Price",
-    "Current price": "Current Price",
+    "average_price": "Avg Price",
+    "Current price": "CMP",
     "PE": "P/E Ratio",
-    "Invested Amount":"Invested",
+    "Invested Amount": "Total Invested",
+    "Current Value" : "Total Current Value"
     }, inplace=True)
 
     fmt_dict = {
-    "Current Price": "{:.2f}",
-    "Average Price": "{:.2f}",
+    "CMP": "{:.2f}",
+    "Avg Price": "{:.2f}",
     "Quantity": "{:.0f}",
     "P/E Ratio": "{:.2f}",
     "EPS": "{:.2f}",
     "PB Ratio": "{:.2f}",
-    "Invested": "{:.2f}",
-    "Current Value": "{:.2f}",
+    "Total Invested": "{:.2f}",
+    "Total Current Value": "{:.2f}",
     "Profit/Loss": "{:.2f}",
     "52Week High": "{:.2f}",
     "52Week Low": "{:.2f}",
+    "P/L %": "{:.2f}"
         }
 
     def highlight_row(row):
         """Subtle row background for gain/loss"""
-        if row["Current Value"] > row["Invested"]:
+        if row["Total Current Value"] > row["Total Invested"]:
             return ["background-color: rgba(0, 255, 0, 0.05)"] * len(row)  # soft green tint
-        elif row["Current Value"] < row["Invested"]:
+        elif row["Total Current Value"] < row["Total Invested"]:
             return ["background-color: rgba(255, 0, 0, 0.05)"] * len(row)  # soft red tint
         else:
             return [""] * len(row)

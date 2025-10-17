@@ -106,9 +106,11 @@ if cos_list:
     stock_portfolio, stock_df, on="symbol", how="left"
     ).drop_duplicates(subset=["symbol"])
     #stock_view_df = concatenated_df_stock.copy() #created copy as market cap data getting null  value
+    concatenated_df_stock["asset"] = concatenated_df_stock["asset"].map(str.title)
     concatenated_df_stock["Invested Amount"] = concatenated_df_stock["quantity"] *concatenated_df_stock["average_price"]
     concatenated_df_stock["Current Value"] = concatenated_df_stock["quantity"] *concatenated_df_stock["Current price"]
     concatenated_df_stock["Profit/Loss"] =  concatenated_df_stock["Current Value"] - concatenated_df_stock["Invested Amount"]
+    concatenated_df_stock["P/L %"] =  concatenated_df_stock["Profit/Loss"] / concatenated_df_stock["Invested Amount"] * 100
     stock_view_df = concatenated_df_stock.copy()
     numeric_cols = ["EPS", "Profit/Loss", "Market Cap"]
     for col in numeric_cols:
@@ -117,14 +119,11 @@ if cos_list:
     #st.write(concatenated_df_stock)
     total_invested_stock = concatenated_df_stock["Invested Amount"].sum()
     total_current_amount_stock = concatenated_df_stock["Current Value"].sum()
-        #print(concatenated_df_stock.columns)
+    #print(concatenated_df_stock.columns)
 
 if mf_isin_list:
     with st.spinner("Calculating XIRR and CAGR for your funds..."):
-        print("**************** here mf list********************")
-        print(mf_isin_list)
         mf_df = mf_data(mf_isin_list,mf_transactions)
-        print("**************** here mf list********************")
         #st.write(mf_df)
         mf_df["invested"] = pd.to_numeric(mf_df["invested"], errors="coerce") #converting to numeric from string
         mf_df["current_amount"] = pd.to_numeric(mf_df["current_amount"], errors="coerce") #converting to numeric from string
@@ -133,6 +132,7 @@ if mf_isin_list:
         mf_portfolio, mf_df, on="symbol", how="left"
         ).drop_duplicates(subset=["symbol"])
         #st.write(concatenated_df_mf)
+        concatenated_df_mf["P/L %"] =  concatenated_df_mf["Profit/Loss"] / concatenated_df_mf["invested"] * 100
         concatenated_df_mf.index = concatenated_df_mf.index + 1 
         total_invested_mf = concatenated_df_mf["invested"].sum()
         total_current_amount_mf =  concatenated_df_mf["current_amount"].sum()

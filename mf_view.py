@@ -9,10 +9,11 @@ def mfdata_graph(concatenated_df_mf, total_invested_mf, total_current_amount_mf)
     profit_loss = total_current_amount_mf - total_invested_mf
     pl_percent = (profit_loss / total_invested_mf) * 100 if total_invested_mf > 0 else 0
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("💰 Total Invested", f"₹{total_invested_mf:,.0f}")
-    col2.metric("📈 Current Value", f"₹{total_current_amount_mf:,.0f}")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("💰 Total Invested in Mutul Fund", f"₹{total_invested_mf:,.0f}")
+    col2.metric("📈 Current Value in Mutul Fund", f"₹{total_current_amount_mf:,.0f}")
     col3.metric("P/L", f"₹{profit_loss:,.0f}", f"{pl_percent:.2f}%", delta_color="normal")
+    col4.metric("P/L %", f"₹{pl_percent:,.0f}")
 
     st.markdown("---")
 
@@ -87,7 +88,7 @@ def mfdata_graph(concatenated_df_mf, total_invested_mf, total_current_amount_mf)
         color="Color",
         orientation="h",
         barmode="group",
-        title="Invested vs Current Value (🔴 Loss / 🟢 Gain)",
+        title="Total Invested vs Total Current Value (🔴 Loss / 🟢 Gain)",
         color_discrete_map="identity"
     )
 

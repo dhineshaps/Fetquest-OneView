@@ -159,7 +159,7 @@ def mf_data(mf_list,mf_transactions):
     mf_rets = []
 
     for symbol in mf_list:
-        print(f"Processing MF ISIN: {symbol}")
+        # print(f"Processing MF ISIN: {symbol}")
         mf_df = mf_transactions[mf_transactions["symbol"] == symbol].copy()
         if mf_df.empty:
             print(f"No transactions for {symbol}, skipping.")
