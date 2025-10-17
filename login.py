@@ -81,6 +81,7 @@ def login_form():
                     val = check_password(password, pwd_val)
                     if val:
                         st.success("Logged in!")
+                        st.session_state.clear()
                         try:     
                             user_id = (
                                 supabase.table("fet_portfolio_users")
@@ -137,8 +138,9 @@ def login_form():
                 st.error(f"Error inserting user: {e}")
                 st.stop()
 
-            ret_user = supabase.table("fet_portfolio_users").select("user_id", "username").eq("email", guser_email).execute()
-
+        
+        ret_user = supabase.table("fet_portfolio_users").select("user_id", "username").eq("email", guser_email).execute()
+        st.session_state.clear()   
         user_data = ret_user.data[0]
         st.session_state.logged_in = True
         st.session_state.u_id = user_data["user_id"]
