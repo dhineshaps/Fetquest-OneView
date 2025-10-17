@@ -1,0 +1,7 @@
+Insert buy/sell → goes into mf_transactions.
+
+Update holdings → after every insert, you recompute holdings (units left, avg NAV) and update the row in holdings.
+
+Query portfolio → always use holdings (fast, aggregated).
+
+Audit / returns calculation → use mf_transactions.

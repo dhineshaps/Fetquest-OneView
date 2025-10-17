@@ -1,0 +1,11 @@
+[theme]
+base="dark"
+
+[server]
+enableStaticServing = true
+
+[ui]
+showPagesFromConfig = true
+
+[client]
+showSidebarNavigation = false

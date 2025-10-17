@@ -1,2 +1,12 @@
 yfinance
 streamlit
+supabase
+st-pages
+bcrypt
+extra-streamlit-components
+streamlit-cookies-manager
+streamlit-aggrid
+streamlit-navigation-bar
+numpy_financial
+plotly
+Authlib
