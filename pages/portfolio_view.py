@@ -52,7 +52,7 @@ top_navbar()
 #st.title("FETQuest OneView - Portfolio")
 
 
-# cos_list,mf_isin_list,gold_list = [],[],[]
+cos_list,mf_isin_list,gold_list = [],[],[]
 
 user_id = st.session_state.u_id
 # st.write(user_id)
