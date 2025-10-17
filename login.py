@@ -112,18 +112,16 @@ def login_form():
             st.switch_page("pages/signup.py")
 
     with col2:
-     #if not st.user.is_logged_in:
-    #  if hasattr(st, "user") and getattr(st.user, "is_logged_in", False):
-     if st.button("Log in with Google", type="primary"):
-            st.login()
-     st.stop()
+        if not getattr(st, "user", None) or not getattr(st.user, "is_logged_in", False):
+            if st.button("Log in with Google", type="primary"):
+                st.login()
+            st.stop()
 
-     if st.user.is_logged_in:
         guser_name = st.user.name.strip()
         guser_email = st.user.email.strip().lower()
 
         try:
-            ret_user = supabase.table("fet_portfolio_users").select("user_id","username").eq("email", guser_email).execute()
+            ret_user = supabase.table("fet_portfolio_users").select("user_id", "username").eq("email", guser_email).execute()
         except APIError as e:
             st.error(f"Database error: {e}")
             st.stop()
@@ -132,22 +130,23 @@ def login_form():
             try:
                 supabase.table("fet_portfolio_users").insert({
                     "username": guser_name,
-                    "password_hash": guser_cred,
+                    "password_hash": guser_email,  # or any dummy value
                     "email": guser_email
                 }).execute()
             except APIError as e:
                 st.error(f"Error inserting user: {e}")
                 st.stop()
 
-            ret_user = supabase.table("fet_portfolio_users").select("user_id","username").eq("email", guser_email).execute()
+            ret_user = supabase.table("fet_portfolio_users").select("user_id", "username").eq("email", guser_email).execute()
 
         user_data = ret_user.data[0]
         st.session_state.logged_in = True
         st.session_state.u_id = user_data["user_id"]
         st.session_state.u_name = user_data["username"]
         st.session_state["login_method"] = "google"
+
         save_user_cookies(user_data["user_id"], user_data["username"])
-        st.success(f"Logged in as {user_data['username']}")
+        st.success(f"👋 Logged in as {user_data['username']}")
         st.switch_page("pages/portfolio_view.py")
             
 def logout():
