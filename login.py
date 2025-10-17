@@ -112,45 +112,41 @@ def login_form():
             st.switch_page("pages/signup.py")
 
     with col2:
-        user = getattr(st, "user", None)
-
-        # User not logged in
-        if not user or not getattr(user, "is_logged_in", False):
+        if not getattr(st, "user", None) or not getattr(st.user, "is_logged_in", False):
             if st.button("Log in with Google", type="primary"):
                 st.login()
             st.stop()
 
-        # User is now logged in (post rerun)
-        guser_name = user.name.strip()
-        guser_email = user.email.strip().lower()
+        guser_name = st.user.name.strip()
+        guser_email = st.user.email.strip().lower()
 
-        with st.spinner("Verifying your profile..."):
+        try:
+            ret_user = supabase.table("fet_portfolio_users").select("user_id", "username").eq("email", guser_email).execute()
+        except APIError as e:
+            st.error(f"Database error: {e}")
+            st.stop()
+
+        if not ret_user.data:
             try:
-                ret_user = supabase.table("fet_portfolio_users").select("user_id", "username").eq("email", guser_email).execute()
-            except APIError as e:
-                st.error(f"Database error: {e}")
-                st.stop()
-
-            if not ret_user.data:
                 supabase.table("fet_portfolio_users").insert({
                     "username": guser_name,
-                    "password_hash": guser_email,
+                    "password_hash": guser_email,  # or any dummy value
                     "email": guser_email
                 }).execute()
+            except APIError as e:
+                st.error(f"Error inserting user: {e}")
+                st.stop()
 
-                ret_user = supabase.table("fet_portfolio_users").select("user_id", "username").eq("email", guser_email).execute()
+            ret_user = supabase.table("fet_portfolio_users").select("user_id", "username").eq("email", guser_email).execute()
 
-            user_data = ret_user.data[0]
-
-        # Save session
+        user_data = ret_user.data[0]
         st.session_state.logged_in = True
         st.session_state.u_id = user_data["user_id"]
         st.session_state.u_name = user_data["username"]
         st.session_state["login_method"] = "google"
 
         save_user_cookies(user_data["user_id"], user_data["username"])
-
-        st.success(f"👋 Welcome, {user_data['username']}!")
+        st.success(f"👋 Logged in as {user_data['username']}")
         st.switch_page("pages/portfolio_view.py")
             
 def logout():
