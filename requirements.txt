@@ -10,3 +10,4 @@ streamlit-navigation-bar
 numpy_financial
 plotly
 Authlib
+google.generativeai

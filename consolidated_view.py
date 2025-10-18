@@ -1,6 +1,7 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
+from gemini_llm import get_ai_portfolio_recommendation
 
 def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold,total_current_amount_stock,total_current_amount_mf,total_current_amount_gold):
         if total_invested_gold != 0:
@@ -183,3 +184,44 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             st.plotly_chart(fig_pl, use_container_width=True)
         else:
             st.info("No assets available to display portfolio allocation.")
+
+        
+        with st.expander("AI Portfolio Recommendation"):
+            st.info("This analysis assumes a 10-year investment horizon and is fully AI-curated. Treat the results as a preview for informational purposes only, No Individual Assests are Analyzed , only the portfolio based on allocation")
+            with st.form("portfolio_form"):
+                risk_profile = st.selectbox(
+                    "What is your Risk Profile?",
+                    ("Conservative", "Moderate", "Aggressive"),
+                    index=1
+                )
+                goal = st.selectbox(
+                    "What is your Goal?",
+                    (
+                        "Wealth Growth",
+                        "Retirement Corpus",
+                        "Buying a Home",
+                        "Child’s Education",
+                        "Capital Preservation",
+                        "Emergency Fund",
+                        "Financial Independence"
+                    ),
+                )
+                submitted = st.form_submit_button("Get AI Report")
+
+                if submitted:
+                    with st.spinner("Analyzing your portfolio..."):
+                        response = get_ai_portfolio_recommendation(
+                            total_invested,
+                            total_current_invested_value,
+                            total_invested_stock,
+                            total_invested_mf,
+                            total_invested_gold,
+                            total_current_amount_stock,
+                            total_current_amount_mf,
+                            total_current_amount_gold,
+                            risk_profile,
+                            goal
+                        )
+
+                    st.markdown("### 🧭 AI Recommendation")
+                    st.write(response)
