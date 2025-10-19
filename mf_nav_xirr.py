@@ -6,50 +6,6 @@ import streamlit as st
 from utils import load_user_id
 from query import load_portfolio, load_mf_transactions
 
-# # --- Initialize session state ---
-# if "logged_in" not in st.session_state:
-#     st.session_state.logged_in = False
-# if "u_id" not in st.session_state:
-#     st.session_state.u_id = None
-
-# # Load user ID if not already in session
-# if not st.session_state.u_id:
-#     st.session_state.u_id = load_user_id()
-#     st.session_state.logged_in = bool(st.session_state.u_id)
-
-# # --- Block access if not logged in ---
-# if not st.session_state.logged_in:
-#     st.error("Please login first!")
-#     st.stop()
-
-# #####################################################################
-# user_id = st.session_state.u_id
-
-# # --- Load Mutual Fund Transactions for Current User ---
-# def show_mf_transactions(user_id):
-#     """Fetch and format MF transactions for given user."""
-#     print(f"Fetching MF transactions for user: {user_id}")
-#     df = load_mf_transactions(user_id)
-#     if df is None or df.empty:
-#         return pd.DataFrame(columns=["symbol", "txn_type", "txn_date", "amount", "units"])
-#     df = df.reset_index(drop=True)
-#     df.index = df.index + 1
-#     df.index.name = "S.No"
-#     return df
-
-# # Refresh logic: load only if user changed or data missing
-# if (
-#     "mf_transactions" not in st.session_state
-#     or st.session_state.get("current_user") != user_id
-# ):
-#     st.session_state.mf_transactions = show_mf_transactions(user_id)
-#     st.session_state.current_user = user_id
-#     st.rerun()  # force rerun after first fetch
-
-# mf_transactions = st.session_state.mf_transactions
-
-#####################################################################
-
 def get_nav_from_mfapi(scheme_code):
     url = f"https://api.mfapi.in/mf/{scheme_code}"
     resp = requests.get(url)
@@ -150,7 +106,12 @@ def calculate_xirr_cagr_for_fund(df, current_nav=None):
 
 
 #####################################################################
-def mf_data(mf_list,mf_transactions):
+
+@st.cache_data
+def mf_data(mf_list,mf_transactions,data_version):
+    # st.write("inside mf xirr")
+    # st.write(mf_transactions.columns)
+    # st.write(mf_transactions)
     """Generate summary metrics (XIRR, CAGR, invested, etc.) for MF list."""
     if not mf_list:
         st.info("No mutual funds found for this user.")
@@ -159,10 +120,10 @@ def mf_data(mf_list,mf_transactions):
     mf_rets = []
 
     for symbol in mf_list:
-        # print(f"Processing MF ISIN: {symbol}")
+        #print(f"Processing MF ISIN: {symbol}")
         mf_df = mf_transactions[mf_transactions["symbol"] == symbol].copy()
         if mf_df.empty:
-            print(f"No transactions for {symbol}, skipping.")
+            #print(f"No transactions for {symbol}, skipping.")
             continue
 
         try:

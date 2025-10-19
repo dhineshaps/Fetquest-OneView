@@ -5,50 +5,24 @@ from query import insert_mf_transactions,delete_mf_transaction,delete_mf_transac
 import uuid
 from postgrest.exceptions import APIError
 from collections import defaultdict
-from utils import load_user_id
 from navbar import top_navbar
-from utils import load_user_id,load_user_name
+from utils import load_user_id,load_user_name,init_session
 import os
 import time
 st.set_page_config(page_title="Manage Portfolio", layout="wide")
 
-# --- Initialize session state ---
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-if "u_id" not in st.session_state:
-    st.session_state.u_id = None
-if "u_name" not in st.session_state:
-    st.session_state.u_name = None
-
-# If no u_id in session, try loading from storage
-if not st.session_state.u_id:
-    st.session_state.u_id = load_user_id()
-    st.session_state.logged_in = bool(st.session_state.u_id)
-
-if not st.session_state.u_name:
-    st.session_state.u_name = load_user_name()
-    st.session_state.logged_in = bool(st.session_state.u_name)
-
-
-# --- Block access if not logged in ---
-if not st.session_state.logged_in:
-    st.error("Please login first!")
-    st.stop()
-
-#st.title("FETQuest OneView – Manage Portfolio")
-st.markdown("<h1 style='text-align: center; color: #FFA500;font-size: 30px'>FETQuest OneView - Manage Portfolio</h1>", unsafe_allow_html=True)
-#st.write(f"Welcome! Your User ID: {st.session_state.u_id}")
+init_session()
 
 st.session_state.current_page = "Manage Portfolio"
+st.markdown("<h1 style='text-align: center; color: #FFA500;font-size: 30px'>FETQuest OneView - Manage Portfolio</h1>", unsafe_allow_html=True)
 
 top_navbar()
 
+# st.write(st.session_state.data_version)
 user_id = st.session_state.u_id
 #st.write(user_id)
 user_name = st.session_state.u_name
 st.markdown(f"<h3 style='color:#296E3E;font-size: 20px'>👋 Welcome, <b>{user_name}</b>!</h3>", unsafe_allow_html=True)
-######################################## The Above to hanlde the session state ###############################
-#st.title("FETQuest OneView – Manage Portfolio")
 
 st.markdown(
     """
@@ -66,31 +40,13 @@ st.markdown(
 )
 
 
-# portfolio_curd = pd.DataFrame([
-#         {"Asset": "Stock", "Name": "TCS.NS", "Qty": 5, "Avg Price": 3200},
-#         {"Asset": "Stock", "Name": "FET.NS", "Qty": 5, "Avg Price": 320.6},
-#         {"Asset": "Stock", "Name": "ITC.NS", "Qty": 5, "Avg Price": 3200},
-#         {"Asset": "Stock", "Name": "INFY.NS", "Qty": 5, "Avg Price": 3200},
-#         {"Asset": "MF", "Name": "NIFTY50", "Qty": 5, "Avg Price": 3200},
-#         {"Asset": "Gold", "Name": "Gold ETF", "Qty": 10, "Avg Price": None}
-#     ])
-
-# st.table(portfolio_curd)
-
-# ---------------- READ HOLDING ----------------
-
 def show_holdings(user_id):  # user id needs to be passed
     df = load_portfolio(user_id).reset_index(drop=True)
     df.index = df.index + 1 
     df.index.name = "S.No"
     return df
 
-#portfolio_curd will be used in Update and Delete for filtering
-portfolio_curd = show_holdings(user_id)  # user id needs to be passed
-
-# print(portfolio_curd)
-
-# Creating new Dataframe for user visualization with cosmetic changes.
+portfolio_curd = st.session_state.portfolio_curd 
 
 portfolio_dashboard = portfolio_curd
 
@@ -98,13 +54,7 @@ if not portfolio_dashboard.empty:
     portfolio_dashboard = portfolio_dashboard.drop("symbol", axis=1)
     portfolio_dashboard.columns = portfolio_dashboard.columns.str.capitalize()
     portfolio_dashboard ["Asset"] = portfolio_dashboard ["Asset"].str.upper()
-#     with st.expander("View your holdings"):
-#         st.dataframe(portfolio_dashboard , use_container_width=True)
-# else:
-#     with st.expander("View your holdings"):
-#         st.write("Portfolio is Empty")
 
-#----------------------------------------------------------------------------#
 
 def show_mf_transactions(user_id):  # user id needs to be passed
     df = load_mf_transactions(user_id).reset_index(drop=True)
@@ -112,7 +62,7 @@ def show_mf_transactions(user_id):  # user id needs to be passed
     df.index.name = "S.No"
     return df
 
-mf_transactions = show_mf_transactions(user_id)  # user id needs to be passed
+mf_transactions = st.session_state.mf_transactions
 
 if not mf_transactions.empty:
     mf_transactions.columns = ['Transaction Id', 'Mutual Fund Scheme','Symbol','Date','Transaction Type','Invested','NAV','UNITS','Transaction Date']
@@ -120,20 +70,12 @@ if not mf_transactions.empty:
     mf_transactions["Date"] = mf_transactions["Transaction Date"].dt.date
     mf_transactions["Time"] = mf_transactions["Transaction Date"].dt.time
     mf_transactions =  mf_transactions.drop("Transaction Date",axis=1)
-#     with st.expander("View your MF transactions"):
-#         st.dataframe(mf_transactions , use_container_width=True)
-# else:
-#     with st.expander("View your MF transactions"):
-#         st.write("No Mutual Fund Transactions Recorded")
 
-
-# ---------------- ADD HOLDING ----------------
 
 @st.cache_data(show_spinner="Loading stock list data...")
 def load_stock_list():
     return pd.read_csv("nse_equity.csv", low_memory=False)
 
-# stock = pd.read_csv("nse_equity.csv")
 stock = load_stock_list()
 stock["NAME OF COMPANY"] = stock["NAME OF COMPANY"].str.lower()
 cos_list = stock["NAME OF COMPANY"].tolist()
@@ -141,16 +83,8 @@ cos_list = stock["NAME OF COMPANY"].tolist()
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
 fund_list = mf["Scheme Name"].tolist()
 
-# mf_new = pd.read_csv('mf_funds.csv')
-# column_names_index = mf_new .columns #test
-
-# @st.cache_data(show_spinner="Loading mutual fund data...")
-# def load_fund_data():
-#     return pd.read_csv("mf_funds.csv", low_memory=False)
-
-# mf_new = load_fund_data()
-# column_names_index = mf_new.columns
 csv_file = "mf_funds.csv"
+
 parquet_file = "mf_funds.parquet"
 if (
     not os.path.exists(parquet_file)
@@ -317,11 +251,11 @@ with tab1:
             invalid_rows = []
             for row in st.session_state["rows"]:
                 asset_type = st.session_state.get(f"type_{row}")
-                print(asset_type)
+                #print(asset_type)
                 price = st.session_state.get(f"price_{row}", 0)
                 amount = st.session_state.get(f"amt_{row}", 0)
                 nav = st.session_state.get(f"nav_{row}", 0)
-                print("nav",nav)
+                #print("nav",nav)
                 if asset_type in ("Stock") and (price is None or price <= 0):
                     invalid_rows.append(row)
                 if asset_type in ("Mutual Fund") and (( amount is None or amount <= 0) or (nav is None or nav <= 0)):
@@ -353,7 +287,7 @@ with tab1:
             if  mf_txns:
                 for i in mf_txns:
                     user_id, type, fund,fund_isin,txn_date, txn_type, amout,nav, units = i
-                    print(fund)
+                    #print(fund)
                     try:
                         dat = get_mf_data(user_id,fund)
                         #print(dat)
@@ -393,7 +327,7 @@ with tab1:
                                 st.write("Success")
 
                     else:
-                        print("Sell Trnsaction")
+                        #print("Sell Trnsaction")
                         # prefer sell as individual transaction
                         if not dat.data:
                             st.error(f"{fund} is not in your holdings to sell")
@@ -417,7 +351,7 @@ with tab1:
                                 new_holding_price = old_price * (new_holding_quantity / old_qty)
                                 asset = fund
                                 try:
-                                    print("updating the holding to specific")
+                                    #print("updating the holding to specific")
                                     update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),user_id)
                                 except APIError as e:
                                     error_data = e.args[0]
@@ -454,6 +388,7 @@ with tab1:
             st.success(f"Asset added to Portfolio")
             time.sleep(1)
             st.toast("✅ Holdings added!", icon="🎉")
+            st.session_state.data_version += 1
             st.session_state["insert_success_Stocks"] = False
             st.session_state["insert_success_mutual_fund"] = False 
             st.rerun()   
@@ -513,7 +448,7 @@ with tab2:
                     avg_price = float(portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "average_price"].item())
                     if option_asset == "Gold" and avg_price == 0.0:
                           avg_price = 0.1
-                    print(f"avg price",{avg_price})
+                    #print(f"avg price",{avg_price})
 
                 qty_new = st.number_input("Quantity", min_value=1, value=qty, step=1, key="update_qty")
                 
@@ -529,6 +464,7 @@ with tab2:
                             #st.info("Proceeding update")
                             res = update_portfolio(qty_new, avg_price_new, asset,user_id)
                             st.success(f"{asset} Updated in Portfolio")
+                            st.session_state.data_version += 1
                             time.sleep(1) 
                             st.toast("✅ Holdings Updated!", icon="🎉")
                             reset_update_state()
@@ -569,7 +505,7 @@ with tab3:
         asset = None
         if option_asset1 in ["Stock","Gold"]:
             asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset1), "asset"].tolist()
-            print(asset_list)
+            #print(asset_list)
             if asset_list:
                 asset = st.selectbox(
                     f"Select {option_asset1}",
@@ -586,7 +522,7 @@ with tab3:
 
             if delete_mf == "Delete the MF holding":
                 asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset1), "asset"].tolist()
-                print(asset_list)
+                #print(asset_list)
                 if asset_list:
                     asset = st.selectbox(
                         f"Select {option_asset1}",
@@ -655,6 +591,7 @@ with tab3:
                         st.write(e)
                         st.stop()
                     st.success(f"{asset.strip()} Deleted from Portfolio")
+                    st.session_state.data_version += 1
                     time.sleep(1) 
                     st.toast("🎉 Holdings Updated!", icon="🎉")
                     reset_delete_state()
@@ -671,6 +608,7 @@ with tab3:
                             st.write(e)
                             st.stop()
                         st.success(f"{asset.strip()} Deleted from Portfolio")
+                        st.session_state.data_version += 1
                         time.sleep(1) 
                         st.toast("🎉 Holdings Updated!", icon="🎉")
                         st.rerun()
@@ -682,24 +620,24 @@ with tab3:
 
                             try:
                                 dats = get_mf_data(user_id,asset.strip())
-                                print("Here in Delete PT")
-                                print(dats)
+                                #print("Here in Delete PT")
+                                #print(dats)
                             except APIError as e:
                                 error_data = e.args[0]
                                 st.stop()
 
                             holding_qty = dats.data[0].get("quantity")
                             holding_price = dats.data[0].get("average_price")
-                            print(holding_qty)
-                            print(tunits)
-                            print(holding_price)
-                            print(tamount)
+                            #print(holding_qty)
+                            #(tunits)
+                            #print(holding_price)
+                            #print(tamount)
 
                             if((tunits == holding_qty ) and (holding_price == tamount)):
-                                print("Both are same , so entire transaction needs toi be deleted")
+                                #print("Both are same , so entire transaction needs toi be deleted")
 
                                 try:
-                                    print("Deleting the entire holding of the Mutual Fund Transaction")
+                                    #print("Deleting the entire holding of the Mutual Fund Transaction")
                                     res = delete_portfolio(user_id,asset.strip())
                                 except APIError as e:
                                     st.write(e)
@@ -708,7 +646,7 @@ with tab3:
                                 new_holding_quantity = holding_qty - tunits
                                 new_holding_price = holding_price - tamount
                                 try:
-                                    print("updating the holding to specific")
+                                    #print("updating the holding to specific")
                                     update_mf_holdings = update_portfolio(new_holding_quantity,new_holding_price,asset.strip(),user_id)
                                 except APIError as e:
                                     error_data = e.args[0]
@@ -717,8 +655,8 @@ with tab3:
                         else:
                             try:
                                 datdel = get_mf_data(user_id,asset.strip())
-                                print("Here in Delete PT")
-                                print(datdel)
+                                #print("Here in Delete PT")
+                                #print(datdel)
                             except APIError as e:
                                 error_data = e.args[0]
                                 st.stop()
@@ -741,7 +679,7 @@ with tab3:
                                 reverted_qty = holding_qty  + new_revert_add_qty
                                 reverted_price = float(holding_price+ new_revert_add_price)
                                 try:
-                                    print("Here in sell")
+                                    #print("Here in sell")
                                     update_mf_holdings_reverted = update_portfolio(reverted_qty,reverted_price,asset.strip(),user_id)
                                 except APIError as e:
                                      error_data = e.args[0]  # APIError contains the dict you pasted
@@ -761,6 +699,7 @@ with tab3:
                             st.stop()
 
                         st.success(f"{asset.strip()} Transaction Deleted from Portfolio")
+                        st.session_state.data_version += 1
                         time.sleep(1)
                         st.toast("🎉 Holdings Updated!", icon="🎉")
                         reset_delete_state()
