@@ -11,3 +11,4 @@ numpy_financial
 plotly
 Authlib
 google.generativeai
+streamlit-js-eval

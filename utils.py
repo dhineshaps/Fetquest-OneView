@@ -60,6 +60,9 @@ def init_session():
     if not st.session_state.u_name:
         st.session_state.u_name = load_user_name()
         st.session_state.logged_in = bool(st.session_state.u_name)
+    
+    if "data_version" not in st.session_state:
+        st.session_state.data_version = 0
 
 
     # --- Block access if not logged in ---

@@ -43,5 +43,52 @@ create table public.fet_portfolio_holdings_mf_transactions (
 );
 
 
-alter table fet_portfolio_holdings
-add column average_nav numeric;
+  
+
+--------------------------------------- new ------------------------------------------------------
+create table fetquest_oneview_users (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text not null,
+  email text not null unique,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+
+create table fetquest_oneview_portfolio_holdings (
+    id bigserial primary key,
+    user_id uuid not null references auth.users(id) on delete cascade,
+    type varchar(50) not null check (type in ('Stock', 'Mutual Fund', 'Gold')),
+    asset text not null,                       -- Reliance, HDFC MF, Gold ETF, etc.
+    symbol varchar(50),                        -- RELIANCE.NS, MF ISIN, etc.
+    quantity numeric(18,6) not null,           -- units / shares / grams
+    average_price numeric(18,6) not null,      -- buy price or NAV
+    average_nav numeric(18,6),
+    last_updated_date date not null default current_date,
+    created_at timestamptz default now() not null
+);
+
+create table fetquest_oneview_mf_transactions (
+    id bigserial primary key,
+    user_id uuid not null references auth.users(id) on delete cascade,
+    fund_name text not null,
+    symbol varchar(50) not null,               -- ISIN or unique MF symbol
+    txn_date date not null,
+    txn_type text not null check (txn_type in ('Buy', 'Sell')),
+    amount numeric(18,6) not null,             -- invested/redeemed amount
+    nav numeric(18,6) not null,
+    units numeric(18,6) not null,
+    created_at timestamptz default now() not null
+);
+
+
+create index idx_portfolio_user on fetquest_oneview_portfolio_holdings(user_id);
+create index idx_mf_txn_user_date on fetquest_oneview_mf_transactions(user_id, txn_date);
+create index idx_mf_txn_symbol on fetquest_oneview_mf_transactions(symbol);
+
+alter table fetquest_oneview_users
+add column security_question TEXT NOT NULL DEFAULT 'quest';
+
+alter table fetquest_oneview_users
+add column security_ANSWER TEXT NOT NULL DEFAULT 'anser';
+
+drop table fetquest_oneview_users;

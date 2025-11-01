@@ -19,7 +19,7 @@ from stock_data_table import stock_data_display
 from mf_data_table import mf_data_display
 from gold_data_table import gold_data_display
 
-st.set_page_config(page_title="View Portfolio", layout="wide")
+st.set_page_config(page_title="View Portfolio",page_icon="the-fet-quest.jpg", layout="wide")
 
 init_session()
 
@@ -45,25 +45,8 @@ total_current_amount_mf = 0.0
 total_current_amount_gold = 0.0
 
 
-# def show_holdings(user_id):
-#     df = load_portfolio(user_id).reset_index(drop=True)
-#     df.index = df.index + 1 
-#     df.index.name = "S.No"
-#     #st.dataframe(df, use_container_width=True)
-
-#     return df
-
-
-# def show_mf_transactions(user_id):  # user id needs to be passed
-#     df = load_mf_transactions(user_id).reset_index(drop=True)
-#     df.index = df.index + 1 
-#     df.index.name = "S.No"
-#     return df
-
-#portfolio_curd will be used in Update and Delete for filtering
-#portfolio_curd = show_holdings(user_id)
-
 portfolio_curd = st.session_state.portfolio_curd 
+# st.write(portfolio_curd)
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
 
 if portfolio_curd.empty:
@@ -88,7 +71,7 @@ mf_transactions = st.session_state.mf_transactions
 if cos_list:
     #with st.spinner("Fetching Stock Details..."):
     stock_df = stock_data(cos_list,st.session_state.data_version)
-    st.write("inside stock list")
+    #st.write("inside stock list")
     #print("in portfolio view")
     #print(stock_df)
     concatenated_df_stock = pd.merge(

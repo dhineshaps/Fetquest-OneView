@@ -9,7 +9,7 @@ from navbar import top_navbar
 from utils import load_user_id,load_user_name,init_session
 import os
 import time
-st.set_page_config(page_title="Manage Portfolio", layout="wide")
+st.set_page_config(page_title="Manage Portfolio",page_icon="the-fet-quest.jpg",layout="wide")
 
 init_session()
 
@@ -38,8 +38,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
 def show_holdings(user_id):  # user id needs to be passed
     df = load_portfolio(user_id).reset_index(drop=True)
     df.index = df.index + 1 
@@ -158,7 +156,7 @@ with tab1:
 
                 col_mf1, col_mf2, col_mf3 = st.columns(3)
                 with col_mf1:
-                    amount = st.number_input("Amount (₹)", min_value=0.0, key=f"amt_{row}")
+                    amount = st.number_input("Amount Invested (₹)", min_value=0.0, key=f"amt_{row}")
                 with col_mf2:
                     nav = st.number_input("NAV", min_value=0.0, key=f"nav_{row}")
                 # with col_mf3:
@@ -734,3 +732,44 @@ if not mf_transactions.empty:
 else:
     with st.expander("View your MF transactions 📒"):
         st.write("No Mutual Fund Transactions Recorded")
+
+st.divider()
+
+with st.expander("Frequently Asked Questions"):
+    with st.expander("Do I need to add only the average price of a stock?"):
+        st.write(
+            "If you purchase multiple quantities of a stock, please enter the total quantity and the average price "
+            "— not the individual purchase prices."
+        )
+
+    with st.expander("How can I update my stock investments?"):
+        st.write(
+            "New investments in existing stocks can be updated in the 'Update Holding' section. "
+            "Please modify the quantity and average price of the stock — not the individual purchase prices."
+        )
+
+    with st.expander("How do I add Mutual Fund SIPs or SWPs?"):
+        st.write(
+            "To calculate XIRR and CAGR, each SIP or SWP needs to be added under 'Add Holding'. "
+            "You’ll need to provide the amount invested and NAV value — units will be automatically calculated."
+        )
+
+    with st.expander("How can I remove or avoid duplicate investments?"):
+        st.write(
+            "For mutual funds, specific transactions can be deleted from 'Delete Holding'. "
+            "You can find the Transaction ID in the 'View MF Transactions' section. "
+            "If the entire investment has been sold, delete it using 'Delete Holding'. "
+            "If only part of the investment is sold (trimmed), update it under 'Update Holding'."
+        )
+
+    with st.expander("How do I add Gold Investments?"):
+        st.write(
+            "Only 22K and 24K gold can be added. A minimum of one gram is required. "
+            "For every new purchase, update it under the 'Update Holding' section."
+        )
+
+    with st.expander("How do I add Gold ETFs?"):
+        st.write(
+            "All ETFs are part of mutual funds. Please find the scheme name and add it under the Mutual Fund section."
+        )
+
