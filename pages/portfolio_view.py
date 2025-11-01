@@ -6,7 +6,7 @@ from postgrest.exceptions import APIError
 import pandas as pd
 from stock import stock_data
 from gold_tm import get_gold_rates
-from utils import load_user_id,load_user_name
+from utils import load_user_id,load_user_name,init_session
 from navbar import top_navbar
 from mf_nav_xirr import mf_data
 import plotly.express as px
@@ -19,38 +19,16 @@ from stock_data_table import stock_data_display
 from mf_data_table import mf_data_display
 from gold_data_table import gold_data_display
 
-st.set_page_config(page_title="View Portfolio", layout="wide")
+st.set_page_config(page_title="View Portfolio",page_icon="the-fet-quest.jpg", layout="wide")
 
-# --- Initialize session state ---
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-if "u_id" not in st.session_state:
-    st.session_state.u_id = None
-if "u_name" not in st.session_state:
-    st.session_state.u_name = None
-
-# If no u_id in session, try loading from storage
-if not st.session_state.u_id:
-    st.session_state.u_id = load_user_id()
-    st.session_state.logged_in = bool(st.session_state.u_id)
-
-if not st.session_state.u_name:
-    st.session_state.u_name = load_user_name()
-    st.session_state.logged_in = bool(st.session_state.u_name)
-
-# --- Block access if not logged in ---
-if not st.session_state.logged_in:
-    st.error("Please login first!")
-    st.stop()
+init_session()
 
 st.session_state.current_page = "View Portfolio"  # update this for each page
 
 st.markdown("<h1 style='text-align: center; color: #FFA500;font-size: 30px'>FETQuest OneView - Portfolio</h1>", unsafe_allow_html=True)
 
+
 top_navbar()
-
-#st.title("FETQuest OneView - Portfolio")
-
 
 cos_list,mf_isin_list,gold_list = [],[],[]
 
@@ -67,23 +45,8 @@ total_current_amount_mf = 0.0
 total_current_amount_gold = 0.0
 
 
-def show_holdings(user_id):
-    df = load_portfolio(user_id).reset_index(drop=True)
-    df.index = df.index + 1 
-    df.index.name = "S.No"
-    #st.dataframe(df, use_container_width=True)
-
-    return df
-
-
-def show_mf_transactions(user_id):  # user id needs to be passed
-    df = load_mf_transactions(user_id).reset_index(drop=True)
-    df.index = df.index + 1 
-    df.index.name = "S.No"
-    return df
-
-#portfolio_curd will be used in Update and Delete for filtering
-portfolio_curd = show_holdings(user_id)
+portfolio_curd = st.session_state.portfolio_curd 
+# st.write(portfolio_curd)
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
 
 if portfolio_curd.empty:
@@ -99,11 +62,16 @@ if not portfolio_curd.empty:
     gold_list = gold_portfolio['asset'].tolist()
 
 
-mf_transactions = show_mf_transactions(user_id)
+#mf_transactions = show_mf_transactions(user_id)
+#st.session_state.mf_transactions.columns = st.session_state.mf_transactions.columns.str.lower()
+mf_transactions = st.session_state.mf_transactions 
+
+# st.write(mf_transactions.columns)
 
 if cos_list:
     #with st.spinner("Fetching Stock Details..."):
-    stock_df = stock_data(cos_list)
+    stock_df = stock_data(cos_list,st.session_state.data_version)
+    #st.write("inside stock list")
     #print("in portfolio view")
     #print(stock_df)
     concatenated_df_stock = pd.merge(
@@ -127,7 +95,7 @@ if cos_list:
 
 if mf_isin_list:
     with st.spinner("Calculating XIRR and CAGR for your funds..."):
-        mf_df = mf_data(mf_isin_list,mf_transactions)
+        mf_df = mf_data(mf_isin_list,mf_transactions,st.session_state.data_version)
         #st.write(mf_df)
         mf_df["invested"] = pd.to_numeric(mf_df["invested"], errors="coerce") #converting to numeric from string
         mf_df["current_amount"] = pd.to_numeric(mf_df["current_amount"], errors="coerce") #converting to numeric from string

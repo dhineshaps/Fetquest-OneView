@@ -42,3 +42,30 @@ def clear_user_id():
         if key in cookies:
             del cookies[key]
     cookies.save()
+
+def init_session():
+    # --- Initialize session state ---
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
+    if "u_id" not in st.session_state:
+        st.session_state.u_id = None
+    if "u_name" not in st.session_state:
+        st.session_state.u_name = None
+
+    # If no u_id in session, try loading from storage
+    if not st.session_state.u_id:
+        st.session_state.u_id = load_user_id()
+        st.session_state.logged_in = bool(st.session_state.u_id)
+
+    if not st.session_state.u_name:
+        st.session_state.u_name = load_user_name()
+        st.session_state.logged_in = bool(st.session_state.u_name)
+    
+    if "data_version" not in st.session_state:
+        st.session_state.data_version = 0
+
+
+    # --- Block access if not logged in ---
+    if not st.session_state.logged_in:
+        st.error("Please login first!")
+        st.stop()

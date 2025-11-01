@@ -20,7 +20,7 @@ supabase: Client = create_client(url, key)
 def load_portfolio(user_id):
  
     try:
-        response_all_stock_data = supabase.table("fet_portfolio_holdings").select("type","quantity","average_price","asset","symbol").eq("user_id", user_id).execute()
+        response_all_stock_data = supabase.table("fetquest_oneview_portfolio_holdings").select("type","quantity","average_price","asset","symbol").eq("user_id", user_id).execute()
     except APIError as e:
         print(e)
         response = st.error("Error in Retrieving the data, Retry after sometime")
@@ -32,7 +32,7 @@ def load_portfolio(user_id):
 def load_mf_transactions(user_id):
  
     try:
-        response_all_mf_data = supabase.table("fet_portfolio_holdings_mf_transactions").select("id","fund_name","symbol","txn_date","txn_type","amount","nav","units","created_at").eq("user_id", user_id).execute()
+        response_all_mf_data = supabase.table("fetquest_oneview_mf_transactions").select("id","fund_name","symbol","txn_date","txn_type","amount","nav","units","created_at").eq("user_id", user_id).execute()
     except APIError as e:
         print(e)
         response = st.error("Error in Retrieving the data, Retry after sometime")
@@ -42,14 +42,14 @@ def load_mf_transactions(user_id):
 
 def insert_portfolio1(ins_data):
     return (
-        supabase.table("fet_portfolio_holdings")
+        supabase.table("fetquest_oneview_portfolio_holdings")
         .insert(ins_data)
         .execute()
     )
 
 def get_mf_data(user_id,asset):
     return (
-        supabase.table("fet_portfolio_holdings")
+        supabase.table("fetquest_oneview_portfolio_holdings")
         .select("quantity","average_price")
         .eq("user_id",user_id)
         .eq("asset",asset)
@@ -58,14 +58,14 @@ def get_mf_data(user_id,asset):
 
 def insert_mf_holdings(user_id,type,qty,avg_price,asset,fund_isin):
     return (
-        supabase.table("fet_portfolio_holdings")
+        supabase.table("fetquest_oneview_portfolio_holdings")
         .insert({"user_id": user_id, "type": type,"asset": asset,"quantity": qty,"average_price":avg_price,"symbol":fund_isin})
         .execute()
     )
 
 def insert_mf_transactions(mfs_data):
     return (
-        supabase.table("fet_portfolio_holdings_mf_transactions")
+        supabase.table("fetquest_oneview_mf_transactions")
         .insert(mfs_data)
         .execute()
     )
@@ -75,7 +75,7 @@ def update_portfolio(qty,avg_price,asset,user_id):
     try:
 
         response = (
-            supabase.table("fet_portfolio_holdings")
+            supabase.table("fetquest_oneview_portfolio_holdings")
             .update({"quantity": qty,"average_price":avg_price})
             .eq("user_id",user_id)
             .eq("asset", asset)
@@ -97,7 +97,7 @@ def delete_portfolio(user_id,asset):
     try:
 
         response = (
-            supabase.table("fet_portfolio_holdings")
+            supabase.table("fetquest_oneview_portfolio_holdings")
             .delete()
             .eq("user_id", user_id)
             .eq("asset", asset)
@@ -118,7 +118,7 @@ def delete_mf_transaction(user_id,asset):
     try:
 
         response = (
-            supabase.table("fet_portfolio_holdings_mf_transactions")
+            supabase.table("fetquest_oneview_mf_transactions")
             .delete()
             .eq("user_id", user_id)
             .eq("fund_name", asset)
@@ -137,7 +137,7 @@ def delete_mf_transaction_id(user_id,asset,id):
     try:
 
         response = (
-            supabase.table("fet_portfolio_holdings_mf_transactions")
+            supabase.table("fetquest_oneview_mf_transactions")
             .delete()
             .eq("user_id", user_id)
             .eq("id", id)
@@ -156,7 +156,7 @@ def delete_mf_transaction_id(user_id,asset,id):
 
 def get_mf_data_amount(user_id,asset):
     return (
-        supabase.table("fet_portfolio_holdings")
+        supabase.table("fetquest_oneview_portfolio_holdings")
         .select("quantity","average_price")
         .eq("user_id",user_id)
         .eq("asset",asset)

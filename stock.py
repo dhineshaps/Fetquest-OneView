@@ -25,7 +25,7 @@ def format_market_cap(market_cap: float) -> tuple[str, str]:
 stock_df = []
 
 @st.cache_data
-def stock_data(stock_list):
+def stock_data(stock_list,data_version):
     for stock_name in stock_list:
         scrip = f"{stock_name}.NS"
         stock = yf.Ticker(scrip)
