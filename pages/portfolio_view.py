@@ -120,10 +120,14 @@ if gold_list:
         ).drop_duplicates(subset=["asset"])
         concatenated_df_gold["average_price"] = pd.to_numeric(concatenated_df_gold["average_price"], errors="coerce") #converting to numeric from string
         concatenated_df_gold["Current price"] = pd.to_numeric(concatenated_df_gold["Current price"], errors="coerce") #converting to numeric from string
+        concatenated_df_gold["quantity"] = pd.to_numeric(concatenated_df_gold["quantity"], errors="coerce")
         concatenated_df_gold.index = concatenated_df_gold.index + 1 
-        #print( concatenated_df_gold.columns)
-        total_invested_gold =  concatenated_df_gold["average_price"].sum()
-        total_current_amount_gold = concatenated_df_gold["Current price"].sum()
+        if not concatenated_df_gold.empty:
+            total_invested_gold = (concatenated_df_gold["average_price"] * concatenated_df_gold["quantity"]).sum()
+            total_current_amount_gold = (concatenated_df_gold["Current price"] * concatenated_df_gold["quantity"]).sum()
+        else:
+            total_invested_gold = 0
+            total_current_amount_gold = 0
 
 
 

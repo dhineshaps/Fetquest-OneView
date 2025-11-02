@@ -65,7 +65,7 @@ with st.form("my_form"):
                         "email": Email,
                         "password": password,
                         "options": {
-                            "email_redirect_to": "http://localhost:8501/verification"
+                            "email_redirect_to": "https://fetquest-oneview.streamlit.app/verification"
                         }
                     })
             except APIError as e:
@@ -92,7 +92,7 @@ with st.form("my_form"):
             time.sleep(4)
             st.switch_page("login.py")
         else:
-            st.write("User Already Exits, Please try to login or with Google SSO")
+            st.write("User Already Exits, Please try to login")
 
 col1, col2 = st.columns(2)
 
