@@ -66,6 +66,7 @@ def gold_data_display(gold_view_df):
         .format(fmt_dict)
     )
 
+    #print(df_Gold_display)
     return styled_df_gold
 
 

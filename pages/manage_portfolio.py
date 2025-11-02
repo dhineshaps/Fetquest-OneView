@@ -179,7 +179,7 @@ with tab1:
             if asset_type == "Stock":
                 st.number_input("Average Price Per Stock", min_value=0.0, key=f"price_{row}")
             elif asset_type == "Gold":
-                st.number_input("**_Optional Price_** ", min_value=0.0, key=f"price_{row}")
+                st.number_input("**_Optional Avg Price/gram_** ", min_value=0.0, key=f"price_{row}")
             else:
                 pass
 
