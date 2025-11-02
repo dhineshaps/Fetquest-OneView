@@ -95,5 +95,12 @@ git clone https://github.com/<your-username>/fetquest-oneview.git
 cd fetquest-oneview
 
 ```
+---
+
+# 🏗️ System Architecture
+
+![FETQuest OneView Architecture](FETQuest_OneView_Architecture.png)
+
+---
 
 **Built with ❤️ by The FET Quest using Streamlit & AI-powered insights for the Indian investors.**
