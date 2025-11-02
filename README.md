@@ -3,6 +3,19 @@
 **The FETQuest OneView** is a simple and intuitive **Investment Portfolio Dashboard** designed for Indian investors.  
 It helps you manage and visualize your holdings in **Stocks**, **Mutual Funds**, and **Gold**, without overwhelming data or complex screens.
 
+🔗 **Live App:** [https://fetquest-oneview.streamlit.app/](https://fetquest-oneview.streamlit.app/)
+
+---
+
+## 🧭 Getting Started
+
+> 💡 **First-time users must sign up and verify their email before logging in.**
+
+1. **Sign Up:** Create your account with a valid email ID.  
+2. **Verify Email:** Check your inbox for the verification link and confirm your email.  
+3. **Login:** Once verified, sign in and start managing your portfolio.  
+4. **Forgot Password:** Use the “Forgot Password” link on the login screen to reset it anytime.
+
 ---
 
 ## 🌟 Key Features
@@ -81,6 +94,6 @@ If you have any feedback, suggestions, or issues, feel free to reach out at:
 git clone https://github.com/<your-username>/fetquest-oneview.git
 cd fetquest-oneview
 
+```
 
----
 **Built with ❤️ by The FET Quest using Streamlit & AI-powered insights for the Indian investors.**
