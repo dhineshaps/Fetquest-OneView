@@ -50,7 +50,8 @@ portfolio_curd = st.session_state.portfolio_curd
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
 
 if portfolio_curd.empty:
-    st.info("Welcome, Your Portfolio is Empty Navigate to Manage Portfolio to add.")
+    st.info("Welcome! Your portfolio is empty. Navigate to 'Manage Portfolio' to add your investments.")
+    st.info("Refer to the FAQs in 'Manage Portfolio' if you have any questions about adding, updating, or deleting your investment details.")
 
 # st.write(portfolio_curd)
 if not portfolio_curd.empty:
