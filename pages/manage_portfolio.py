@@ -177,7 +177,7 @@ with tab1:
 
         with col4:
             if asset_type == "Stock":
-                st.number_input("Average Price", min_value=0.0, key=f"price_{row}")
+                st.number_input("Average Price Per Stock", min_value=0.0, key=f"price_{row}")
             elif asset_type == "Gold":
                 st.number_input("**_Optional Price_** ", min_value=0.0, key=f"price_{row}")
             else:
@@ -408,7 +408,7 @@ def reset_update_state():
         if key in st.session_state:
             del st.session_state[key]
 with tab2:
-        st.info("Mutual Fund Buy/Sell are handled in Transactions")
+        st.info("Mutual Fund Buy/Sell are handled in Add Holdings")
     #def update_holiding():
         if "update_expanded" not in st.session_state:
             st.session_state.update_expanded = False
@@ -430,7 +430,13 @@ with tab2:
             st.session_state.delete_expanded = False
 
         if option_asset in ["Stock", "Mutual Fund", "Gold"]:
-            asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset), "asset"].tolist()
+            try:
+                asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset), "asset"].tolist()
+            except:
+                st.info("Your portfolio is empty. Please add your investments.")
+                st.stop()
+            if len(asset_list) == 0:
+                st.info(f"Your portfolio is empty. Please add your {option_asset} investments to update it.")
             #st.write(asset_list)
             asset = st.selectbox(
                 f"Select {option_asset}",
@@ -502,7 +508,11 @@ with tab3:
 
         asset = None
         if option_asset1 in ["Stock","Gold"]:
-            asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset1), "asset"].tolist()
+            try:
+                asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset1), "asset"].tolist()
+            except:
+                st.info("Your portfolio is empty. Please add your investments.")
+                st.stop()
             #print(asset_list)
             if asset_list:
                 asset = st.selectbox(
@@ -519,7 +529,11 @@ with tab3:
             delete_mf  = st.selectbox("Mutual Fund Delete",["Delete Particular Transaction","Delete the MF holding"],index=None,key="delete_mf")
 
             if delete_mf == "Delete the MF holding":
-                asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset1), "asset"].tolist()
+                try:
+                    asset_list = portfolio_curd.loc[(portfolio_curd["type"] == option_asset1), "asset"].tolist()
+                except:
+                    st.info("Your portfolio is empty. Please add your investments.")
+                    st.stop()
                 #print(asset_list)
                 if asset_list:
                     asset = st.selectbox(
@@ -542,39 +556,43 @@ with tab3:
                         unsafe_allow_html=True
                     )
                 trans_id = st.number_input("Enter the transaction ID to delete", min_value=0)
-                if trans_id > 0:  #need to handle as if trans_id found in th e df, sometime after deleting it casuing error as it not found but it mostly due to no re run
-                    #['Transaction Id', 'Mutual Fund Scheme','Transaction Type','Invested','NAV','UNITS','Transaction Date']
-                    asset = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Mutual Fund Scheme"].item()
-                    type = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Transaction Type"].item()
-                    tdate =  mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Date"].item()
-                    tunits = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"UNITS"].item()
-                    tamount = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Invested"].item()
+                try:  
+                    if trans_id > 0:  #need to handle as if trans_id found in th e df, sometime after deleting it casuing error as it not found but it mostly due to no re run
+                        #['Transaction Id', 'Mutual Fund Scheme','Transaction Type','Invested','NAV','UNITS','Transaction Date']
+                        asset = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Mutual Fund Scheme"].item()
+                        type = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Transaction Type"].item()
+                        tdate =  mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Date"].item()
+                        tunits = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"UNITS"].item()
+                        tamount = mf_transactions.loc[mf_transactions["Transaction Id"]==trans_id,"Invested"].item()
 
-                    st.markdown(
-                        f"""
-                        <p style="color:#ff6666; font-weight:bold; font-size:15px;">
-                            ⚠️ You are about to delete the following transaction:
-                        </p>
-                        """,
-                        unsafe_allow_html=True
-                    )
+                        st.markdown(
+                            f"""
+                            <p style="color:#ff6666; font-weight:bold; font-size:15px;">
+                                ⚠️ You are about to delete the following transaction:
+                            </p>
+                            """,
+                            unsafe_allow_html=True
+                        )
 
-                    st.markdown(
-                        f"""
-                        <div style="
-                            padding:10px; 
-                            border:1px solid #444; 
-                            border-radius:8px; 
-                            background-color:#1e1e1e;
-                        ">
-                            <p style="font-weight:bold; font-size:16px; margin:0; color:#ffffff;">{asset}</p>
-                            <p style="color:#CD5C5C; margin:0;">Transaction Type : {type}</p>
-                            <p style="color:#CD5C5C; margin:0;">Transaction Date : {tdate}</p>
-                            <p style="color:#CD5C5C; margin:0;">Units : {tunits} units</p>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+                        st.markdown(
+                            f"""
+                            <div style="
+                                padding:10px; 
+                                border:1px solid #444; 
+                                border-radius:8px; 
+                                background-color:#1e1e1e;
+                            ">
+                                <p style="font-weight:bold; font-size:16px; margin:0; color:#ffffff;">{asset}</p>
+                                <p style="color:#CD5C5C; margin:0;">Transaction Type : {type}</p>
+                                <p style="color:#CD5C5C; margin:0;">Transaction Date : {tdate}</p>
+                                <p style="color:#CD5C5C; margin:0;">Units : {tunits} units</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                except:
+                    st.info("Your portfolio is empty. Please add your investments.")
+                    st.stop()
 
 
         col_d1, col_d2 = st.columns([1,1])
@@ -772,4 +790,10 @@ with st.expander("Frequently Asked Questions"):
         st.write(
             "All ETFs are part of mutual funds. Please find the scheme name and add it under the Mutual Fund section."
         )
+
+    with st.expander("Reach us via Email"):
+        st.write(
+            "Feel free to drop an email at daps.fetquest@gmail.com for any feedback or queries."
+        )
+
 
