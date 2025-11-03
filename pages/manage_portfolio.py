@@ -451,20 +451,28 @@ with tab2:
             )
 
             if asset:
-                qty = int(portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "quantity"].item())
+                if option_asset == "Stock":
+                    qty = int(portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "quantity"].item())
+                elif option_asset == "Gold":
+                    qty = portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "quantity"].item()
+                qty = pd.to_numeric(qty,errors="coerce")
                 if option_asset in ["Stock", "Mutual Fund","Gold"]:
                     avg_price = float(portfolio_curd.loc[(portfolio_curd["type"] == option_asset) & (portfolio_curd["asset"] == asset), "average_price"].item())
                     if option_asset == "Gold" and avg_price == 0.0:
                           avg_price = 0.1
                     #print(f"avg price",{avg_price})
-
-                qty_new = st.number_input("Quantity", min_value=1, value=qty, step=1, key="update_qty")
+                if option_asset == "Stock":
+                    qty_new = st.number_input("Quantity", min_value=1, value=qty, step=1, key="update_qty")
+                elif option_asset == "Gold":
+                    qty_new = st.number_input("Quantity", min_value=0.01, value=qty, step=0.01, format="%.2f", key="update_qty")
+                else:
+                    pass
                 
                 if option_asset in ["Stock", "Mutual Fund","Gold"]:
                     avg_price_new = st.number_input("Average Price", min_value=0.1, value=avg_price, step=0.1, key="update_avg_price")
                 if qty_new and avg_price_new:
                     invested_amt = qty_new * avg_price_new
-                    st.caption(f"💰 *New Updated Invested Amount:* ₹{invested_amt:,.2f}")
+                    st.caption(f"💰 *New Updated Invested Amount will be:* ₹{invested_amt:,.2f}")
                 else:
                     avg_price_new = 0
 
