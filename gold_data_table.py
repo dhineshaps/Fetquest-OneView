@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 
 def gold_data_display(gold_view_df):
-
     cols_to_keep = [
         "asset", "average_price", "quantity",
         "Current price"
@@ -28,7 +27,7 @@ def gold_data_display(gold_view_df):
 
     fmt_dict = {
         "Average Price": "{:.2f}",
-        "Quantity": "{:.0f}",
+        "Quantity": "{:.2f}",
         "Invested": "{:.2f}",
         "Current Price": "{:.2f}",
         "Current Value": "{:.2f}",
@@ -66,7 +65,7 @@ def gold_data_display(gold_view_df):
         .format(fmt_dict)
     )
 
-    #print(df_Gold_display)
+    #print(styled_df_gold)
     return styled_df_gold
 
 

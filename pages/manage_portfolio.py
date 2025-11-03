@@ -167,21 +167,25 @@ with tab1:
 
         with col3:
          if asset_type == "Stock":
-            st.number_input("Quantity", min_value=1, key=f"qty_{row}")
+            qty = st.number_input("Quantity", min_value=1, key=f"qty_{row}")
          elif asset_type == "Mutual Fund":
              #st.number_input("Units", min_value=1, key=f"qty_{row}")
              units = round(amount / nav, 2) if nav > 0 else 0.0
              st.metric("Units", f"{units:.2f}")
          else:
-             st.number_input("Gram", min_value=1, key=f"qty_{row}")
+            qty = st.number_input("Gram",min_value=0.01, step=0.01, format="%.2f", key=f"qty_{row}")
 
         with col4:
             if asset_type == "Stock":
-                st.number_input("Average Price Per Stock", min_value=0.0, key=f"price_{row}")
+               price = st.number_input("Average Price Per Stock", min_value=0.0, key=f"price_{row}")
             elif asset_type == "Gold":
-                st.number_input("**_Optional Avg Price/gram_** ", min_value=0.0, key=f"price_{row}")
+                price = st.number_input("**_Optional Avg Price/gram_** ", min_value=0.0, key=f"price_{row}")
             else:
                 pass
+
+            if qty and price:
+                invested_amt = qty * price
+                st.caption(f"💰 *Invested Amount:* ₹{invested_amt:,.2f}")
 
         with col5:
             st.button("❌", key=f"del_{row}", on_click=remove_row, args=[row]) #🗑️
@@ -458,6 +462,9 @@ with tab2:
                 
                 if option_asset in ["Stock", "Mutual Fund","Gold"]:
                     avg_price_new = st.number_input("Average Price", min_value=0.1, value=avg_price, step=0.1, key="update_avg_price")
+                if qty_new and avg_price_new:
+                    invested_amt = qty_new * avg_price_new
+                    st.caption(f"💰 *New Updated Invested Amount:* ₹{invested_amt:,.2f}")
                 else:
                     avg_price_new = 0
 
