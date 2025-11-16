@@ -33,7 +33,7 @@ create table public.fet_portfolio_holdings_mf_transactions (
     id bigserial primary key,
     user_id int not null,
     fund_name text not null,
-    symbol varchar(50),   
+    symbol varchar(50),
     txn_date date not null,
     txn_type text check (txn_type in ('Buy','Sell')) not null,
     amount numeric not null,
@@ -43,7 +43,7 @@ create table public.fet_portfolio_holdings_mf_transactions (
 );
 
 
-  
+
 
 --------------------------------------- new ------------------------------------------------------
 create table fetquest_oneview_users (
@@ -72,6 +72,7 @@ create table fetquest_oneview_mf_transactions (
     user_id uuid not null references auth.users(id) on delete cascade,
     fund_name text not null,
     symbol varchar(50) not null,               -- ISIN or unique MF symbol
+    type text not null,
     txn_date date not null,
     txn_type text not null check (txn_type in ('Buy', 'Sell')),
     amount numeric(18,6) not null,             -- invested/redeemed amount
