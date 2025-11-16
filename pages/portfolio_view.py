@@ -13,7 +13,7 @@ import plotly.express as px
 from consolidated_view import consolidated_data
 from stock_view import stock_data_graph
 from mf_view import mfdata_graph
-from gold_view import gold_data_graph  
+from gold_view import gold_data_graph
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 from stock_data_table import stock_data_display
 from mf_data_table import mf_data_display
@@ -45,7 +45,7 @@ total_current_amount_mf = 0.0
 total_current_amount_gold = 0.0
 
 
-portfolio_curd = st.session_state.portfolio_curd 
+portfolio_curd = st.session_state.portfolio_curd
 # st.write(portfolio_curd)
 mf= pd.read_csv("amfi_mutual_fund_list.csv")
 
@@ -65,8 +65,9 @@ if not portfolio_curd.empty:
 
 #mf_transactions = show_mf_transactions(user_id)
 #st.session_state.mf_transactions.columns = st.session_state.mf_transactions.columns.str.lower()
-mf_transactions = st.session_state.mf_transactions 
+mf_transactions = st.session_state.mf_transactions
 
+#st.write(mf_transactions)
 # st.write(mf_transactions.columns)
 
 if cos_list:
@@ -88,7 +89,7 @@ if cos_list:
     numeric_cols = ["EPS", "Profit/Loss", "Market Cap"]
     for col in numeric_cols:
         concatenated_df_stock[col] = pd.to_numeric(concatenated_df_stock[col], errors="coerce")
-    concatenated_df_stock.index = concatenated_df_stock.index + 1 
+    concatenated_df_stock.index = concatenated_df_stock.index + 1
     #st.write(concatenated_df_stock)
     total_invested_stock = concatenated_df_stock["Invested Amount"].sum()
     total_current_amount_stock = concatenated_df_stock["Current Value"].sum()
@@ -106,7 +107,7 @@ if mf_isin_list:
         ).drop_duplicates(subset=["symbol"])
         #st.write(concatenated_df_mf)
         concatenated_df_mf["P/L %"] =  concatenated_df_mf["Profit/Loss"] / concatenated_df_mf["invested"] * 100
-        concatenated_df_mf.index = concatenated_df_mf.index + 1 
+        concatenated_df_mf.index = concatenated_df_mf.index + 1
         total_invested_mf = concatenated_df_mf["invested"].sum()
         total_current_amount_mf =  concatenated_df_mf["current_amount"].sum()
         #print(concatenated_df_mf.columns)
@@ -121,7 +122,7 @@ if gold_list:
         concatenated_df_gold["average_price"] = pd.to_numeric(concatenated_df_gold["average_price"], errors="coerce") #converting to numeric from string
         concatenated_df_gold["Current price"] = pd.to_numeric(concatenated_df_gold["Current price"], errors="coerce") #converting to numeric from string
         concatenated_df_gold["quantity"] = pd.to_numeric(concatenated_df_gold["quantity"], errors="coerce")
-        concatenated_df_gold.index = concatenated_df_gold.index + 1 
+        concatenated_df_gold.index = concatenated_df_gold.index + 1
         if not concatenated_df_gold.empty:
             total_invested_gold = (concatenated_df_gold["average_price"] * concatenated_df_gold["quantity"]).sum()
             total_current_amount_gold = (concatenated_df_gold["Current price"] * concatenated_df_gold["quantity"]).sum()
@@ -134,7 +135,7 @@ if gold_list:
 tab1, tab2, tab3, tab4 = st.tabs(["Consolidated Portfolio", "Stock", "Mutual Fund","Gold"])
 
 with tab1:
-   
+
      if cos_list or mf_isin_list or gold_list:
         consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold,total_current_amount_stock,total_current_amount_mf,total_current_amount_gold)
      else:
@@ -163,4 +164,3 @@ with tab4:
         gold_data_graph(concatenated_df_gold,total_invested_gold,total_current_amount_gold)
     else:
         st.info("Gold is not in you portfolio")
-
