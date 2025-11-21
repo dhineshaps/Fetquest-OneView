@@ -93,7 +93,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
         if not alloc_df.empty:
             pie_df = alloc_df[["Asset", "Current"]].rename(columns={"Current": "Current Value"})
             pie_df["Asset"] = pie_df["Asset"].apply(lambda x: "Stock" if "Stock" in x else ("Mutual Fund" if "Mutual Fund" in x else "Gold"))
-            fig_pie = px.pie(
+            fig_pie = px.pie( #handling colors for pie chart
                 pie_df,
                 names="Asset",
                 values="Current Value",
