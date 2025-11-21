@@ -92,7 +92,8 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
         col1, col2 = st.columns(2)
         if not alloc_df.empty:
             pie_df = alloc_df[["Asset", "Current"]].rename(columns={"Current": "Current Value"})
-            fig_pie = px.pie(
+            pie_df["Asset"] = pie_df["Asset"].apply(lambda x: "Stock" if "Stock" in x else ("Mutual Fund" if "Mutual Fund" in x else "Gold"))
+            fig_pie = px.pie( #handling colors for pie chart
                 pie_df,
                 names="Asset",
                 values="Current Value",
@@ -124,7 +125,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             title="Invested vs Current Value by Asset",
             color_discrete_map={
                 "Invested": "#636EFA",
-                "Current": "#CA3015",
+                "Current": "#1ABC9C",
             }
         )
         #     fig_bar = px.bar(
