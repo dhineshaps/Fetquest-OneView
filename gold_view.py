@@ -11,7 +11,7 @@ def gold_data_graph(concatenated_df_gold,total_invested_gold,total_current_amoun
         col1, col2, col3 = st.columns(3)
         col1.metric("💰 Total Invested", f"₹{total_invested_gold:,.0f}")
         col2.metric("📈 Current Value", f"₹{total_current_amount_gold:,.0f}")
-        col3.metric("P/L", f"₹{profit_loss:,.0f}", f"{pl_percent:.2f}%", delta_color="normal")
+        col3.metric("Profit/Loss", f"₹{profit_loss:,.0f}", f"{pl_percent:.2f}%", delta_color="normal")
     else:
         st.info("Investment Value is not clear to create metrics")
 

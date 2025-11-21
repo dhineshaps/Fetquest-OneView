@@ -12,17 +12,17 @@ def stock_data_graph(concatenated_df_stock, total_invested_stock, total_current_
     col1.metric("💰 Total Invested in Stocks", f"₹{total_invested_stock:,.0f}")
     col2.metric("📈 Total Current Value", f"₹{total_current_amount_stock:,.0f}")
     col3.metric(
-        "P/L",
+        "Profit/Loss",
         f"₹{profit_loss:,.0f}",
         f"{pl_percent:.2f}%",
         delta_color="normal"
     )
-    col4.metric("P/L %", f"₹{pl_percent:,.0f}")
+    col4.metric("Profit/Loss %", f"₹{pl_percent:,.0f}")
 
     st.markdown("---")
 
     col1,col2 = st.columns(2)
- 
+
     # --- Sector Allocation Pie Chart ---
     with col1:
         if "Sector" in concatenated_df_stock.columns:
@@ -35,7 +35,7 @@ def stock_data_graph(concatenated_df_stock, total_invested_stock, total_current_
             )
             fig_sector.update_traces(textinfo="percent+label")
             st.plotly_chart(fig_sector, use_container_width=True)
-    
+
     with col2:
         if "Sector" in concatenated_df_stock.columns:
             fig_sector = px.pie(
