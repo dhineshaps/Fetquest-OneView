@@ -12,8 +12,8 @@ def mfdata_graph(concatenated_df_mf, total_invested_mf, total_current_amount_mf)
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("💰 Total Invested in Mutul Fund", f"₹{total_invested_mf:,.0f}")
     col2.metric("📈 Current Value in Mutul Fund", f"₹{total_current_amount_mf:,.0f}")
-    col3.metric("P/L", f"₹{profit_loss:,.0f}", f"{pl_percent:.2f}%", delta_color="normal")
-    col4.metric("P/L %", f"₹{pl_percent:,.0f}")
+    col3.metric("Profit/Loss", f"₹{profit_loss:,.0f}", f"{pl_percent:.2f}%", delta_color="normal")
+    col4.metric("Profit/Loss %", f"₹{pl_percent:,.0f}")
 
     st.markdown("---")
 

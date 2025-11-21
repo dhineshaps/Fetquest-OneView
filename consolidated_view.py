@@ -19,7 +19,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             col1.metric("💰 Total Invested", f"₹{total_invested:,.0f}")
             col2.metric("📈 Current Value", f"₹{total_current_invested_value:,.0f}")
             col3.metric(
-                "P/L",
+                "Profit/Loss",
                 f"₹{profit_loss:,.0f}",
                 f"{pl_percent:.2f}%",
                 delta_color="normal"
