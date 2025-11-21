@@ -10,7 +10,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             total_current_invested_value = total_current_amount_stock  + total_current_amount_mf + total_current_amount_gold
             #st.write(total_current_invested_value)
             profit_loss = total_current_invested_value - total_invested
-            #st.write(profit_loss) 
+            #st.write(profit_loss)
             #st.write(portfolio_curd)
 
             pl_percent = (profit_loss / total_invested) * 100 if total_invested > 0 else 0
@@ -19,8 +19,8 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             col1.metric("💰 Total Invested", f"₹{total_invested:,.0f}")
             col2.metric("📈 Current Value", f"₹{total_current_invested_value:,.0f}")
             col3.metric(
-                "P/L", 
-                f"₹{profit_loss:,.0f}", 
+                "P/L",
+                f"₹{profit_loss:,.0f}",
                 f"{pl_percent:.2f}%",
                 delta_color="normal"
             )
@@ -35,8 +35,8 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             col1.metric("💰 Total Invested", f"₹{total_invested:,.0f}")
             col2.metric("📈 Current Value", f"₹{total_current_invested_value:,.0f}")
             col3.metric(
-                "P/L", 
-                f"₹{profit_loss:,.0f}", 
+                "P/L",
+                f"₹{profit_loss:,.0f}",
                 f"{pl_percent:.2f}%",
                 delta_color="normal"
             )
@@ -51,7 +51,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             col2.metric("📈 Current Value", f"₹{total_current_invested_value_sep:,.0f}")
             col3.metric("📈 P/L", f"₹{profit_loss_Sep:,.0f}")
 
-        
+
         if (total_invested_gold is None or total_invested_gold == 0) and total_current_amount_gold != 0:
             st.info("⚠️ Gold profit/loss is not included due to missing invested amount.")
 
@@ -72,13 +72,13 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
         var_name="Type",
         value_name="Value"
             )
-        
+
         asset_colors = {
         "Stocks": "#7B1FA2",         # purple
         "Mutual Funds": "#1565C0",   # blue
         "Gold": "#D4AF37"           # gold
         }
-        
+
         color_map = {
         ("Stocks", "Invested"): "#7B1FA2",
         ("Stocks", "Current"): "#BA68C8",
@@ -100,9 +100,9 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
                 title="Asset Allocation by Current Value",
                 color="Asset",
                 color_discrete_map={
-                "Stock": "#990EC4",     
-                "Mutual Fund": "#2f1dd3", 
-                "Gold": "#DDBF13",        
+                "Stock": "#990EC4",
+                "Mutual Fund": "#2f1dd3",
+                "Gold": "#DDBF13",
             }
             )
             with col1:
@@ -123,15 +123,15 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             barmode="group",
             title="Invested vs Current Value by Asset",
             color_discrete_map={
-                "Invested": "#636EFA",   # Example blue
-                "Current": "#EF553B",    # Example red
+                "Invested": "#636EFA",
+                "Current": "#1D7480EA",
             }
         )
         #     fig_bar = px.bar(
         #     bar_df,
         #     x="Asset",
         #     y="Value",
-        #     color="Asset",               # 👈 color by Asset
+        #     color="Asset",
         #     barmode="group",
         #     pattern_shape="Type",        # differentiates Invested vs Current by pattern
         #     title="Invested vs Current Value by Asset",
@@ -159,7 +159,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
                     x=1
                 )
             )
-            
+
         #     fig_bar.update_layout(
         #     xaxis_title="Asset",
         #     yaxis_title="Value (₹)",
@@ -185,7 +185,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
         else:
             st.info("No assets available to display portfolio allocation.")
 
-        
+
         with st.expander("AI Portfolio Recommendation"):
             st.info("This analysis assumes a 10-year investment horizon and is fully AI-curated. Treat the results as a preview for informational purposes only, No Individual Assests are Analyzed , only the portfolio based on allocation")
             with st.form("portfolio_form"):
