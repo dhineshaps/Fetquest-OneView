@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
 import streamlit as st
+import time
 
 def format_market_cap(market_cap: float) -> tuple[str, str]:
 
@@ -15,36 +16,48 @@ def format_market_cap(market_cap: float) -> tuple[str, str]:
         csize = "Mid Cap"
     else:
         csize = "Small Cap"
-    
+
     s = f"{int(round(crore_value)):,}"
     s = s.replace(",", "X")[::-1].replace("X", ",", 1)[::-1] #to get indian style commas
     formatted = s + " Cr"
 
     return formatted , csize
 
-stock_df = []
 
 @st.cache_data
 def stock_data(stock_list,data_version):
+    stock_df = []
     for stock_name in stock_list:
         scrip = f"{stock_name}.NS"
-        stock = yf.Ticker(scrip)
-        CMP = stock .info.get("currentPrice","N/A")
-        sector =  stock.info.get("sectorKey", "N/A")
-        pe = stock.info.get("trailingPE", "N/A")
-        eps =stock.info.get("trailingEps", "N/A")
-        PB = stock.info.get("priceToBook")
-        mcap = stock.info.get("marketCap","N/A")
-        if mcap != "N/A":
-            mcap_formated,csize = format_market_cap(stock.info.get("marketCap"))
-        df = yf.download(scrip, period="1y")   
-        week52High = round(df["High"].max().item(),2)
-        week52Low = round(df["High"].min().item(),2)
-        stock_df.append([stock_name,CMP,sector,pe,eps,PB, mcap,mcap_formated,csize,week52High,week52Low])
+        try:
+            stock = yf.Ticker(scrip)
+            CMP = stock .info.get("currentPrice","N/A")
+            sector =  stock.info.get("sectorKey", "N/A")
+            pe = stock.info.get("trailingPE", "N/A")
+            eps =stock.info.get("trailingEps", "N/A")
+            PB = stock.info.get("priceToBook")
+            mcap = stock.info.get("marketCap","N/A")
+            if mcap != "N/A":
+                mcap_formated,csize = format_market_cap(stock.info.get("marketCap"))
+            else:
+                mcap_formated = "N/A"
+                csize = "N/A"
+            df = yf.download(scrip, period="1y")
+            if not df.empty:
+                week52High = round(df["High"].max(),2)
+                week52Low = round(df["Low"].min(),2)
+            else:
+                week52High = "N/A"
+                week52Low = "N/A"
+            stock_df.append([stock_name,CMP,sector,pe,eps,PB, mcap,mcap_formated,csize,week52High,week52Low])
+            time.sleep(0.1)
+        except Exception as e:
+            st.warning(f"Could not fetch data for {stock_name}: {e}")
+            stock_df.append([stock_name] + [None]*10)
     df_stock_list = pd.DataFrame(stock_df, columns=["symbol","Current price","Sector","PE","EPS","PB Ratio","Market Cap Num","Market Cap","Company Size","52Week High","52Week Low"])
     #print(df_stock_list)
     return df_stock_list
-     
+
 
 
 
@@ -81,16 +94,16 @@ Based on the following financial data, determine if the stock is:
 
 Stock: RELIANCE.NS
 
-- Current market price: {{current_price}}  
-- Earnings per share (EPS): {{eps}}  
-- Price-to-Earnings (P/E) ratio: {{pe_ratio}}  
+- Current market price: {{current_price}}
+- Earnings per share (EPS): {{eps}}
+- Price-to-Earnings (P/E) ratio: {{pe_ratio}}
 - Industry average P/E: {{industry_pe}}  -->Not available
-- Book value per share: {{book_value_per_share}}  
-- Price-to-Book (P/B) ratio: {{pb_ratio}}  
-- Dividend yield: {{dividend_yield}}  
-- Recent revenue growth: {{revenue_growth}}  
-- Recent earnings growth: {{earnings_growth}}  
-- Debt-to-equity ratio: {{de_ratio}}  
+- Book value per share: {{book_value_per_share}}
+- Price-to-Book (P/B) ratio: {{pb_ratio}}
+- Dividend yield: {{dividend_yield}}
+- Recent revenue growth: {{revenue_growth}}
+- Recent earnings growth: {{earnings_growth}}
+- Debt-to-equity ratio: {{de_ratio}}
 
 **Return only one word from: Overvalued, Undervalued, Neutral, Cautious.**
 Do not explain.
