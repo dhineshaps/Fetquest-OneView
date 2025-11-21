@@ -124,7 +124,7 @@ def consolidated_data(total_invested_stock,total_invested_mf,total_invested_gold
             title="Invested vs Current Value by Asset",
             color_discrete_map={
                 "Invested": "#636EFA",
-                "Current": "#EF553B",
+                "Current": "#CA3015",
             }
         )
         #     fig_bar = px.bar(
